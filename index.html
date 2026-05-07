@@ -5,15 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Jeu de Memory</title>
   <link rel="stylesheet" href="css/style.css">
-  <link rel="stylesheet" href="tab-style.css">
   <script src="js/app.js" type="module"></script>
-  <script src="js/jquery-4.0.0.js"></script>
-  <script src="tab.js"></script>
 </head>
 <body>
 <header><h1>Jeu de Memory</h1></header>
 <template id="cardTemplate">
-  <div class="card" data-selected=false>
+  <div class="card">
     <div class="card-inner">
       <div class="card-front">
         <img src="./assets/images/mask1.jpg" draggable="false" alt="Hidden card">
@@ -25,7 +22,6 @@
   </div>
 
 </template>
-<svg id="liens"></svg>
 <div class="setup-form">
   <h2>Démarrer une nouvelle partie</h2>
   <form class="game-form">
@@ -44,6 +40,13 @@
       <option value="cars">Voitures</option>
       <option value="fruits">Fruits</option>
     </select>
+    <label title="Le mode élimination autorise le joueur à faire trois erreurs, une fois les 3 erreurs commises, la partie est terminée." for="hardcore">Mode élimination (?)</label>
+    <input id="hardcore" type="checkbox">
+    <label for="gamemode">Mode de jeu</label>
+    <select id="gamemode">
+      <option value="regular">Memory classique</option>
+      <option value="graphe">Memory graphe</option>
+    </select>
     <button type="submit">Soumettre</button>
   </form>
 
@@ -54,10 +57,11 @@
     <h2 class="game-timer">00:00:00</h2>
     <button id="abandon">Abandon</button>
   </div>
-  <div class="game-board"></div>
+  <div class="graphe-board hidden graphe">
+    <svg id="liens"></svg>
+  </div>
+  <div class="game-board hidden"></div>
 </div>
-<div class="graphe-area hidden">
-  <svg id="liens"></svg>
-</div>
+
 </body>
 </html>

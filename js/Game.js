@@ -1,6 +1,92 @@
 import {imageCollections} from './ImageCollection.js';
 import {ApiService} from './ApiService.js';
 
+function entierAleatoire(max) {
+  return Math.floor(Math.random() * max);
+}
+
+function genererGraphe(nbSommets, nbAretes) {
+
+  // -----------------------------
+  // Sécurité :
+  // un graphe connexe avec N sommets
+  // doit avoir au minimum N - 1 arêtes
+  // -----------------------------
+  if (nbAretes < nbSommets - 1) {
+    nbAretes = nbSommets - 1;
+  }
+
+  // -----------------------------
+  // Création des sommets
+  // A, B, C, D...
+  // -----------------------------
+  const sommets = [];
+
+  for (let i = 0; i < nbSommets; i++) {
+    sommets.push(String.fromCharCode(65 + i));
+    console.log(String.fromCharCode(65+i));
+  }
+  console.log(sommets)
+  // -----------------------------
+  // Initialisation du graphe
+  // -----------------------------
+  /**
+   *
+   * @type {Map<string, Array<String>>}
+   */
+  const graphe = new Map();
+
+  sommets.forEach(sommet => {
+    graphe.set(sommet,[]);
+  });
+  console.log(graphe)
+
+  // -----------------------------
+  // Étape 1 :
+  // Création d'un graphe connexe
+  // en reliant les sommets en chaîne
+  //
+  // A-B-C-D-E...
+  // -----------------------------
+  let nombreActuelAretes = 0;
+
+  for (let i = 0; i < sommets.length - 1; i++) {
+    const a = sommets[i];
+    const b = sommets[i + 1];
+    graphe.get(a).push(b)
+    graphe.get(b).push(a)
+
+    nombreActuelAretes++;
+  }
+  console.log(graphe);
+  console.log(nombreActuelAretes);
+  // -----------------------------
+  // Étape 2 :
+  // Ajout d'arêtes aléatoires
+  // -----------------------------
+  while (nombreActuelAretes < nbAretes) {
+
+    const a = sommets[entierAleatoire(nbSommets)];
+    const b = sommets[entierAleatoire(nbSommets)];
+
+    // Vérifications :
+    // - pas de boucle A-A
+    // - pas de doublon
+    if (
+        a !== b &&
+        !graphe.get(a).includes(b)
+    ) {
+
+      graphe.get(a).push(b);
+      graphe.get(b).push(a);
+
+      nombreActuelAretes++;
+    }
+  }
+
+  return graphe;
+}
+
 class FinPartie extends CustomEvent{
   constructor(reason) {
     super("gameEnd",{detail:{
@@ -19,7 +105,10 @@ export class Game {
   #difficulty
   #pairesrestantes
   #state
-
+  #hardcore
+  #gamemode
+  #remainingAttempts
+  graphe = {};
   Fin(reason){
     return new FinPartie(reason);
   }
@@ -41,15 +130,24 @@ export class Game {
   /**
    * Start a new game.
    * @param {number} id - The game ID.
+   * @param {string} gamemode
+   * @param {number} difficulty
+   * @param {boolean} hardcore
    */
-  startGame(id) {
+  startGame(id,gamemode,difficulty,hardcore) {
     this.#id = id;
     this.#state = "started"
+    this.#hardcore = hardcore
+    this.#gamemode = gamemode
+    this.#difficulty = difficulty;
+    this.#remainingAttempts=3;
+    if (gamemode==="graphe"){
+      this.graphe = genererGraphe(this.#difficulty,this.#difficulty)
+    }
 
   }
-  setImage(setName,difficulty){
+  setImage(setName){
     this.#setname  = setName;
-    this.#difficulty = difficulty;
     this.#images = imageCollections[this.#setname].splice(this.#difficulty)
     this.#pairesrestantes = this.#difficulty;
   }
@@ -58,6 +156,21 @@ export class Game {
   }
   get state(){
     return this.#state;
+  }
+  get hardcore(){
+    return this.#hardcore;
+  }
+  get gamemode(){
+    return this.#gamemode;
+  }
+  get remainingAttempts(){
+    return this.#remainingAttempts
+  }
+  failedAttempt(){
+    this.#remainingAttempts-=1;
+    if (this.#remainingAttempts===0){
+      document.dispatchEvent(new FinPartie("no-remaining-attempts"))
+    }
   }
   paireDecouverte(event){
     console.log(event.detail)

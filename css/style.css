@@ -103,7 +103,12 @@ header h1 {
   font-size: 0.875rem;
   outline: none;
 }
-
+.game-form input[type=checkbox]{
+  display:unset;
+  width:2em;
+  height:2em;
+  accent-color: red;
+}
 .game-form input:focus,
 .game-form select:focus {
   border-color: var(--color-border-input-focus);
@@ -251,4 +256,77 @@ header h1 {
   height: 100%;
   object-fit: cover;
   border-radius: 0.5rem;
+}
+
+.pulsing {
+  box-shadow: 0 0 0 0 rgba(0, 0, 0, 1);
+  transform: scale(1);
+  &.wrong{
+    animation: wrong-pulse 0.5s ease-in-out;
+    animation-iteration-count: 2;
+  };
+  &.right{
+    animation:right-pulse 0.75s ease-in-out;
+  }
+}
+
+@keyframes wrong-pulse {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.7);
+  }
+
+  70% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 30px rgba(0, 0, 0, 0);
+  }
+
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
+  }
+}
+
+@keyframes right-pulse {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(0, 255,0, 0.7);
+  }
+
+  70% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 20px rgba(0, 0, 0, 0);
+  }
+
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
+  }
+}
+
+#graphe {
+  position: relative;
+  display:flex;
+  border: 1px solid black;
+}
+
+.sommet {
+  position: absolute;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: royalblue;
+  color: white;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  cursor: pointer;
+}
+svg{
+  position:relative;
+  box-sizing: content-box;
+  height:100vh;
+  width:100%;
 }

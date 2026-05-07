@@ -23,6 +23,11 @@ class PairFound extends CustomEvent{
     });
   }
 }
+class WrongPair extends CustomEvent{
+  constructor() {
+    super("wrong-pair");
+  }
+}
 class Chronometer{
   startTime;
   started;
@@ -56,6 +61,13 @@ export class DOMManager {
   flipCard(card){
     card.classList.toggle("flip")
   }
+  pulse(card,correct){
+    card.classList.toggle("pulsing");
+    let color = correct?"right":"wrong";
+    card.classList.toggle(color);
+    setTimeout(()=>{card.classList.toggle(color);card.classList.toggle("pulsing")},1000)
+
+  }
   /**
    * @param {Event}event
    */
@@ -87,15 +99,21 @@ export class DOMManager {
           console.log("Bonne paire");
           secondCard.classList.toggle("found");
           card.classList.toggle("found")
+          this.pulse(card,true);
+          this.pulse(secondCard,true)
           this.enable(); // Si les cartes sont identiques, le joueur peut directement continuer de retourner
           document.dispatchEvent(new PairFound(card.dataset["id"]))
         }
         else{
           console.log("Mauvaise paire")
+
+          this.pulse(card);
+          this.pulse(secondCard);
           setTimeout(()=>{
             this.flipCard(secondCard);
             this.flipCard(card);
             this.enable(); // Si les cartes étaient différentes, on attend qu'elles soient de nouveaux cachées pour laisser le joueur jouer.
+            document.dispatchEvent(new WrongPair());
           },1000)
         }
       }
@@ -109,7 +127,7 @@ export class DOMManager {
     const cardTemplate = document.querySelector("#cardTemplate");
     let card = cardTemplate.content.cloneNode(true).querySelector(".card");
     card.dataset["id"] = `${image.id}`;
-    card.dataset["state"] = "hidden"
+    //card.dataset["state"] = "hidden"
     let img = card.querySelector(".card-back img");
     img.setAttribute("src",image.url);
     img.setAttribute("alt",image.name);
@@ -121,22 +139,6 @@ export class DOMManager {
    * @param {Image[]} images
    */
   createCards(images) {
-    const svg = document.getElementById("liens");
-    const ligne = document.createElementNS(
-        "http://www.w3.org/2000/svg",
-        "line"
-    );
-
-    ligne.setAttribute("x1",  25);
-    ligne.setAttribute("y1",  25);
-
-    ligne.setAttribute("x2",  50);
-    ligne.setAttribute("y2",  50);
-
-    ligne.setAttribute("stroke", "black");
-    ligne.setAttribute("stroke-width", "3");
-
-    svg.appendChild(ligne);
 
     const gameBoard = document.querySelector('.game-board');
     const cardElements = [];
@@ -164,5 +166,46 @@ export class DOMManager {
      </div>
      */
 
+  }
+  createGraphe(graphe){
+    console.log(typeof(graphe))
+    console.log(graphe)
+    for (let sommet of graphe.keys()){
+      console.log(sommet)
+    }
+    const positions = {
+      A: { x: 100, y: 100 },
+      B: { x: 300, y: 100 },
+      C: { x: 100, y: 250 },
+      D: { x: 300, y: 250 }
+    };
+
+    const svg = document.getElementById("liens");
+    for (const sommet of graphe.keys()) {
+      let gr = document.querySelector(".graphe");
+      let sommetEl = document.createElement("div");
+      sommetEl.classList.toggle("sommet");
+      sommetEl.innerText = sommet;
+      sommetEl.style.left = positions[sommet].x + "px";
+      sommetEl.style.top = positions[sommet].y + "px";
+      gr.append(sommetEl)
+      for (let voisin of graphe.get(sommet)) {
+        const ligne = document.createElementNS(
+            "http://www.w3.org/2000/svg",
+            "line"
+        );
+
+        ligne.setAttribute("x1", positions[sommet].x + 25);
+        ligne.setAttribute("y1", positions[sommet].y + 25);
+
+        ligne.setAttribute("x2", positions[voisin].x + 25);
+        ligne.setAttribute("y2", positions[voisin].y + 25);
+
+        ligne.setAttribute("stroke", "black");
+        ligne.setAttribute("stroke-width", "3");
+
+        svg.appendChild(ligne);
+      }
+    }
   }
 }
