@@ -1,24 +1,11 @@
-function shuffle(array) {
-  let currentIndex = array.length;
-
-  // While there remain elements to shuffle...
-  while (currentIndex != 0) {
-
-    // Pick a remaining element...
-    let randomIndex = Math.floor(Math.random() * currentIndex);
-    currentIndex--;
-
-    // And swap it with the current element.
-    [array[currentIndex], array[randomIndex]] = [
-      array[randomIndex], array[currentIndex]];
-  }
-}
-
+import {Game} from "./Game.js";
+import {shuffle} from "./Utils.js";
 class PairFound extends CustomEvent{
-  constructor(id) {
+  constructor(first,second) {
     super("pair-discovered",{
       detail:{
-        pairId : id
+        firstElement : first,
+        secondElement:second
       }
     });
   }
@@ -53,6 +40,13 @@ export class DOMManager {
   chrono = new Chronometer();
   enabled = false;
   graphe;
+  /**
+   *@type {Game} game
+   */
+  game;
+  constructor(game) {
+    this.game = game;
+  }
   enable(){
     this.enabled = true;
   }
@@ -67,6 +61,11 @@ export class DOMManager {
     let color = correct?"right":"wrong";
     card.classList.toggle(color);
     setTimeout(()=>{card.classList.toggle(color);card.classList.toggle("pulsing")},1000)
+
+  }
+
+
+  handleCardResult(result){
 
   }
   /**
@@ -124,11 +123,68 @@ export class DOMManager {
       }
     }
   }
+
+  /**
+   * Met en surbrillance un noeud
+   * @param {string} node Le nom du sommet
+   */
+  highlightNode(node){
+    document.querySelector(`.sommet[data-node=${node}]`).classList.toggle("selected");
+  }
+  discoverNode(node){
+    document.querySelector(`.sommet[data-node=${node}]`).classList.add("found")
+  }
+  clickNode(event){
+    const node = event.target.dataset.node;
+    const result = this.game.selectNode(node);
+    console.log(result)
+    this.handleGraphResult(result);
+  }
+  /**
+   * Affiche l'arête entre deux sommets (à condition qu'elle existe)
+   * @param {string} first Le nom du premier sommet
+   * @param {string} second Le nom du deuxième sommet
+   */
+  showEdge(first,second){
+    for (let edge of document.querySelectorAll("line")){
+      if (edge.dataset["nodes"].includes([first,second].sort().join())){
+        edge.classList.remove("hidden");
+        return;
+      }
+    }
+  }
+  handleGraphResult(result){
+    switch(result.type){
+      case("first-selection"):{
+        this.highlightNode(result.node); break
+      }
+      case("correct-pair"):{
+        this.highlightNode(result.first)
+        this.showEdge(result.first,result.second);
+        if (result.first_discovered){this.discoverNode(result.first);}
+        if (result.second_discovered){this.discoverNode(result.second)};break
+      }
+      case("wrong-pair"):{
+        this.highlightNode(result.first);break
+      }
+      case("already-found"):{
+        this.highlightNode(result.first);break
+      }
+    }
+    let allDiscovered = true
+    for (let node of this.game.graphe.keys()){
+      if (!this.game.isDiscovered(node)){
+        allDiscovered=false;
+      }
+    }
+    if (allDiscovered){
+      this.disable();
+    }
+  }
   createCard(image){
     const cardTemplate = document.querySelector("#cardTemplate");
     let card = cardTemplate.content.cloneNode(true).querySelector(".card");
     card.dataset["id"] = `${image.id}`;
-    //card.dataset["state"] = "hidden"
     let img = card.querySelector(".card-back img");
     img.setAttribute("src",image.url);
     img.setAttribute("alt",image.name);
@@ -151,21 +207,7 @@ export class DOMManager {
     for (let image of cardElements){
       gameBoard.append(image);
     }
-    // Todo À Compléter
 
-    /**
-     * Voici un exemple de contenu de card permettant de contenir une partie masqué
-     * et l'image qui doit être révélée.
-     *
-     <div class="card-inner">
-     <div class="card-front">
-     <img src="./assets/images/mask1.jpg" alt="Hidden card">
-     </div>
-     <div class="card-back hidden">
-     <img src="${image.url}" alt="${image.name}">
-     </div>
-     </div>
-     */
 
   }
   genererPositions(sommets, largeur, hauteur) {
@@ -201,84 +243,19 @@ export class DOMManager {
     });
     return positions;
   }
-
-  clickNode(event){
-    let node = event.target;
-    if (!node.classList.contains("selected") && !node.classList.contains("found")){ // Si le sommet n'était pas déjà selectionné ou déjà découvert en entier
-
-      let secondNode;
-      for (let sommet of document.querySelectorAll(".sommet")) {
-        if (sommet.classList.contains("selected")) {
-          secondNode = sommet;
-        }
-      }
-      if (secondNode!=null){ // Second sommet
-
-        const edge_string = [node.innerText,secondNode.innerText].sort().join();
-        const a_node = edge_string.split(",")[0];
-        const b_node = edge_string.split(",")[1];
-        if (this.graphe.get(a_node).includes(b_node) && !this.discovered_graphe.get(a_node).includes(b_node)){
-          this.discovered_graphe.get(a_node).push(b_node);
-          this.discovered_graphe.get(b_node).push(a_node);
-          for (let edge of document.querySelectorAll("line")) {
-            if (edge.dataset["nodes"].includes(edge_string)) {
-              edge.classList.remove("hidden");
-            }
-          }
-          let a_discovered = true;
-          let b_discovered = true;
-          for (let node of this.graphe.get(a_node)){
-            if (!this.discovered_graphe.get(a_node).includes(node)){
-              a_discovered = false;
-            }
-          }
-          for (let node of this.graphe.get(b_node)){
-            if (!this.discovered_graphe.get(b_node).includes(node)){
-              b_discovered = false;
-            }
-          }
-          console.log(this.graphe.get(a_node));
-          console.log(this.graphe.get(b_node));
-          console.log(this.discovered_graphe.get(a_node));
-          console.log(this.discovered_graphe.get(b_node));
-          if (a_discovered){
-            document.querySelector(`.sommet[data-node=${a_node}]`).classList.add("found");
-          }
-          if (b_discovered){
-            document.querySelector(`.sommet[data-node=${b_node}]`).classList.add("found");
-          }
-        }
-        console.log("FDJDFKSDJ",node,secondNode);
-        secondNode.classList.remove("selected");
-        node.classList.remove("selected");
-        console.log(node.classList.toString());
-      }
-      else{ // Premier sommet
-        node.classList.add("selected")
-      }
-      console.log(event.target);
-    }
-  }
-
   createGraphe(graphe){
-    this.graphe = graphe;
-    this.discovered_graphe = new Map();
-    for (let sommet of this.graphe.keys()){
-      this.discovered_graphe.set(sommet,[]);
-    }
     let grapheElement = document.querySelector("#graphe");
     const positions = this.genererPositions(Array.from(graphe.keys()),document.querySelector(".game-area-header").clientWidth,400);
     const svg = document.querySelector("svg#liens");
     let aretes = [];
     for (const sommet of graphe.keys()) {
-
       let sommetEl = document.createElement("div");
       sommetEl.classList.toggle("sommet");
       sommetEl.innerText = sommet;
       sommetEl.dataset["node"] = sommet;
       sommetEl.style.left = positions[sommet].x + "px";
       sommetEl.style.top = positions[sommet].y + "px";
-      sommetEl.addEventListener("click",(event)=>{this.clickNode(event)})
+      sommetEl.addEventListener("click",(event)=>{if(this.enabled){this.clickNode(event)}})
       grapheElement.append(sommetEl)
       for (let voisin of graphe.get(sommet)) {
         const edge_string = [sommet,voisin].sort().join();
@@ -306,3 +283,16 @@ export class DOMManager {
     }
   }
 }
+/**
+ * Voici un exemple de contenu de card permettant de contenir une partie masqué
+ * et l'image qui doit être révélée.
+ *
+ <div class="card-inner">
+ <div class="card-front">
+ <img src="./assets/images/mask1.jpg" alt="Hidden card">
+ </div>
+ <div class="card-back hidden">
+ <img src="${image.url}" alt="${image.name}">
+ </div>
+ </div>
+ */

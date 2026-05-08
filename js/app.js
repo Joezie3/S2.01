@@ -2,8 +2,9 @@ import {DOMManager} from './DOMManager.js';
 import {Game} from './Game.js';
 import {ApiService} from './ApiService.js';
 
-const domManager = new DOMManager();
+
 const game = new Game();
+const domManager = new DOMManager(game);
 document.addEventListener("gameEnd",(event)=>{
   console.log(game.state)
   if (game.state!=="ended") {
@@ -42,7 +43,6 @@ document.querySelector('.game-form').addEventListener('submit', async function (
         domManager.createCards(game.getImage());
         document.querySelector(".game-board").classList.toggle("hidden")
         document.querySelector(".setup-form").classList.toggle("hidden");
-        document.addEventListener("pair-discovered",(event)=>{game.paireDecouverte(event)})
         domManager.enable();
         break;
       }
@@ -50,7 +50,7 @@ document.querySelector('.game-form').addEventListener('submit', async function (
         document.querySelector(".setup-form").classList.toggle("hidden");
         console.log("LOL" + game.graphe);
         domManager.createGraphe(game.graphe)
-
+        domManager.enable();
         document.querySelector(".graphe-board").classList.toggle("hidden");
       }
     }

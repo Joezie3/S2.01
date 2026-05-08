@@ -1,24 +1,10 @@
 import {imageCollections} from './ImageCollection.js';
 import {ApiService} from './ApiService.js';
-function shuffle(array) {
-  let currentIndex = array.length;
+import {shuffle} from "./Utils.js";
 
-  // While there remain elements to shuffle...
-  while (currentIndex != 0) {
-
-    // Pick a remaining element...
-    let randomIndex = Math.floor(Math.random() * currentIndex);
-    currentIndex--;
-
-    // And swap it with the current element.
-    [array[currentIndex], array[randomIndex]] = [
-      array[randomIndex], array[currentIndex]];
-  }
-}
 function entierAleatoire(max) {
   return Math.floor(Math.random() * max);
 }
-
 function genererGraphe(nbSommets, nbAretes) {
 
   // -----------------------------
@@ -120,13 +106,17 @@ export class Game {
   #hardcore
   #gamemode
   #remainingAttempts
-  graphe = {};
+  #selectedNode = null;
+  #grapheDiscovered = new Map;
+  graphe;
+  discoveredGraphe = new Map();
+  event;
   Fin(reason){
     return new FinPartie(reason);
   }
   async endGame() {
     // Todo À compléter
-    if (this.state !== "ended") {
+    if (this.#state !== "ended") {
       this.#state = "ended"
       try {
         const result = await ApiService.updateGameResult(this.#id, this.#pairesrestantes);
@@ -155,6 +145,9 @@ export class Game {
     this.#remainingAttempts=3;
     if (gamemode==="graphe"){
       this.graphe = genererGraphe(this.#difficulty,this.#difficulty)
+      for (let sommet of this.graphe.keys()){
+        this.#grapheDiscovered.set(sommet,[]);
+      }
     }
 
   }
@@ -169,26 +162,63 @@ export class Game {
   get state(){
     return this.#state;
   }
-  get hardcore(){
-    return this.#hardcore;
-  }
-  get gamemode(){
-    return this.#gamemode;
-  }
-  get remainingAttempts(){
-    return this.#remainingAttempts
-  }
   failedAttempt(){
     this.#remainingAttempts-=1;
-    if (this.#remainingAttempts===0){
+    if (this.#remainingAttempts===0 && this.#hardcore){
+      console.log("FIN DE LA PARTIE HARDCORE")
       document.dispatchEvent(new FinPartie("no-remaining-attempts"))
     }
   }
-  paireDecouverte(event){
-    console.log(event.detail)
+  isDiscovered(node){
+    for (let s_node of this.graphe.get(node)) {
+      if (!this.#grapheDiscovered.get(node).includes(s_node)) {
+        return false
+      }
+    }
+    return true
+  }
+  selectNode(node){
+    if(this.#selectedNode===null){
+      this.#selectedNode = node;
+      return{
+        type:"first-selection",
+        node
+      }
+    }
+    const first = this.#selectedNode
+    const second = node;
+    this.#selectedNode = null;
+    if (first===second){
+      this.#selectedNode = first;
+      return {type:"invalid"}
+    }
+    const connected = this.graphe.get(first).includes(second)
+    if (!connected){
+      this.failedAttempt();
+      return {
+        type : "wrong-pair",
+        first,
+        second,
+      }
+    }
+    if(this.#grapheDiscovered.get(first).includes(second)){
+      return {
+        type: "already-found",
+        first
+      }
+    }
+    this.#grapheDiscovered.get(first).push(second);
+    this.#grapheDiscovered.get(second).push(first)
     this.#pairesrestantes-=1;
     if (this.#pairesrestantes===0){
-        document.dispatchEvent(new FinPartie("regular"))
+      document.dispatchEvent(new FinPartie("regular"))
+    }
+    return {
+      type:"correct-pair",
+      first,
+      second,
+      first_discovered:this.isDiscovered(first),
+      second_discovered:this.isDiscovered(second)
     }
   }
 
