@@ -269,6 +269,29 @@ header h1 {
     animation:right-pulse 0.75s ease-in-out;
   }
 }
+.sommet.selected{
+  box-shadow: 0 0 0 0 rgba(0, 0, 0, 1);
+  transform: scale(1);
+  animation: pulse 1s infinite;
+}
+.sommet.found{
+  background-color: blueviolet;
+}
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(0, 200, 128, 0.7);
+  }
+  70% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 15px rgba(0, 0, 0, 0);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
+  }
+}
+
 
 @keyframes wrong-pulse {
   0% {
@@ -304,10 +327,38 @@ header h1 {
   }
 }
 
+/*#graphe {*/
+/*  position: relative;*/
+/*  display:flex;*/
+/*  border: 1px solid black;*/
+/*}*/
+
+/*.sommet {*/
+/*  position: absolute;*/
+/*  width: 50px;*/
+/*  height: 50px;*/
+/*  border-radius: 50%;*/
+/*  background: royalblue;*/
+/*  color: white;*/
+
+/*  display: flex;*/
+/*  justify-content: center;*/
+/*  align-items: center;*/
+
+/*  cursor: pointer;*/
+/*}*/
+/*svg{*/
+/*  position:relative;*/
+/*  box-sizing: content-box;*/
+/*  height:100vh;*/
+/*  width:100%;*/
+/*}*/
+
 #graphe {
   position: relative;
-  display:flex;
+  height: 400px;
   border: 1px solid black;
+  display:flex;
 }
 
 .sommet {
@@ -325,8 +376,6 @@ header h1 {
   cursor: pointer;
 }
 svg{
-  position:relative;
-  box-sizing: content-box;
-  height:100vh;
-  width:100%;
+  flex:1;
+  margin:-1px;
 }

@@ -52,6 +52,7 @@ class Chronometer{
 export class DOMManager {
   chrono = new Chronometer();
   enabled = false;
+  graphe;
   enable(){
     this.enabled = true;
   }
@@ -167,44 +168,140 @@ export class DOMManager {
      */
 
   }
-  createGraphe(graphe){
-    console.log(typeof(graphe))
-    console.log(graphe)
-    for (let sommet of graphe.keys()){
-      console.log(sommet)
-    }
-    const positions = {
-      A: { x: 100, y: 100 },
-      B: { x: 300, y: 100 },
-      C: { x: 100, y: 250 },
-      D: { x: 300, y: 250 }
-    };
+  genererPositions(sommets, largeur, hauteur) {
+    console.log(largeur,hauteur)
+    const positions = {};
 
-    const svg = document.getElementById("liens");
+    const centreX = largeur / 2;
+    const centreY = hauteur / 2;
+
+    const marge = 60;
+
+    const rayon =
+        Math.min(largeur, hauteur) / 2 - marge;
+
+
+    const angleStep = (2 * Math.PI) / sommets.length;
+
+    sommets.forEach((sommet, i) => {
+      const angle = i * angleStep;
+      const bruit = 30;
+      positions[sommet] = {
+
+        x:
+            centreX +
+            Math.cos(angle) * rayon +
+            (Math.random() * bruit - bruit / 2),
+
+        y:
+            centreY +
+            Math.sin(angle) * rayon +
+            (Math.random() * bruit - bruit / 2)
+      };
+    });
+    return positions;
+  }
+
+  clickNode(event){
+    let node = event.target;
+    if (!node.classList.contains("selected") && !node.classList.contains("found")){ // Si le sommet n'était pas déjà selectionné ou déjà découvert en entier
+
+      let secondNode;
+      for (let sommet of document.querySelectorAll(".sommet")) {
+        if (sommet.classList.contains("selected")) {
+          secondNode = sommet;
+        }
+      }
+      if (secondNode!=null){ // Second sommet
+
+        const edge_string = [node.innerText,secondNode.innerText].sort().join();
+        const a_node = edge_string.split(",")[0];
+        const b_node = edge_string.split(",")[1];
+        if (this.graphe.get(a_node).includes(b_node) && !this.discovered_graphe.get(a_node).includes(b_node)){
+          this.discovered_graphe.get(a_node).push(b_node);
+          this.discovered_graphe.get(b_node).push(a_node);
+          for (let edge of document.querySelectorAll("line")) {
+            if (edge.dataset["nodes"].includes(edge_string)) {
+              edge.classList.remove("hidden");
+            }
+          }
+          let a_discovered = true;
+          let b_discovered = true;
+          for (let node of this.graphe.get(a_node)){
+            if (!this.discovered_graphe.get(a_node).includes(node)){
+              a_discovered = false;
+            }
+          }
+          for (let node of this.graphe.get(b_node)){
+            if (!this.discovered_graphe.get(b_node).includes(node)){
+              b_discovered = false;
+            }
+          }
+          console.log(this.graphe.get(a_node));
+          console.log(this.graphe.get(b_node));
+          console.log(this.discovered_graphe.get(a_node));
+          console.log(this.discovered_graphe.get(b_node));
+          if (a_discovered){
+            document.querySelector(`.sommet[data-node=${a_node}]`).classList.add("found");
+          }
+          if (b_discovered){
+            document.querySelector(`.sommet[data-node=${b_node}]`).classList.add("found");
+          }
+        }
+        console.log("FDJDFKSDJ",node,secondNode);
+        secondNode.classList.remove("selected");
+        node.classList.remove("selected");
+        console.log(node.classList.toString());
+      }
+      else{ // Premier sommet
+        node.classList.add("selected")
+      }
+      console.log(event.target);
+    }
+  }
+
+  createGraphe(graphe){
+    this.graphe = graphe;
+    this.discovered_graphe = new Map();
+    for (let sommet of this.graphe.keys()){
+      this.discovered_graphe.set(sommet,[]);
+    }
+    let grapheElement = document.querySelector("#graphe");
+    const positions = this.genererPositions(Array.from(graphe.keys()),document.querySelector(".game-area-header").clientWidth,400);
+    const svg = document.querySelector("svg#liens");
+    let aretes = [];
     for (const sommet of graphe.keys()) {
-      let gr = document.querySelector(".graphe");
+
       let sommetEl = document.createElement("div");
       sommetEl.classList.toggle("sommet");
       sommetEl.innerText = sommet;
+      sommetEl.dataset["node"] = sommet;
       sommetEl.style.left = positions[sommet].x + "px";
       sommetEl.style.top = positions[sommet].y + "px";
-      gr.append(sommetEl)
+      sommetEl.addEventListener("click",(event)=>{this.clickNode(event)})
+      grapheElement.append(sommetEl)
       for (let voisin of graphe.get(sommet)) {
-        const ligne = document.createElementNS(
-            "http://www.w3.org/2000/svg",
-            "line"
-        );
+        const edge_string = [sommet,voisin].sort().join();
+        if (!aretes.includes(edge_string)) { // On ne trace pas plusieurs fois une arête.
+          aretes.push(edge_string);
+          const ligne = document.createElementNS(
+              "http://www.w3.org/2000/svg",
+              "line"
+          );
 
-        ligne.setAttribute("x1", positions[sommet].x + 25);
-        ligne.setAttribute("y1", positions[sommet].y + 25);
+          ligne.dataset["nodes"] = edge_string;
+          ligne.classList.add("hidden")
+          ligne.setAttribute("x1", positions[sommet].x + 25);
+          ligne.setAttribute("y1", positions[sommet].y + 25);
 
-        ligne.setAttribute("x2", positions[voisin].x + 25);
-        ligne.setAttribute("y2", positions[voisin].y + 25);
+          ligne.setAttribute("x2", positions[voisin].x + 25);
+          ligne.setAttribute("y2", positions[voisin].y + 25);
 
-        ligne.setAttribute("stroke", "black");
-        ligne.setAttribute("stroke-width", "3");
+          ligne.setAttribute("stroke", "lightgrey");
+          ligne.setAttribute("stroke-width", "3");
 
-        svg.appendChild(ligne);
+          svg.appendChild(ligne);
+        }
       }
     }
   }

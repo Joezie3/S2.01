@@ -1,6 +1,20 @@
 import {imageCollections} from './ImageCollection.js';
 import {ApiService} from './ApiService.js';
+function shuffle(array) {
+  let currentIndex = array.length;
 
+  // While there remain elements to shuffle...
+  while (currentIndex != 0) {
+
+    // Pick a remaining element...
+    let randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex--;
+
+    // And swap it with the current element.
+    [array[currentIndex], array[randomIndex]] = [
+      array[randomIndex], array[currentIndex]];
+  }
+}
 function entierAleatoire(max) {
   return Math.floor(Math.random() * max);
 }
@@ -24,9 +38,7 @@ function genererGraphe(nbSommets, nbAretes) {
 
   for (let i = 0; i < nbSommets; i++) {
     sommets.push(String.fromCharCode(65 + i));
-    console.log(String.fromCharCode(65+i));
   }
-  console.log(sommets)
   // -----------------------------
   // Initialisation du graphe
   // -----------------------------
@@ -39,7 +51,7 @@ function genererGraphe(nbSommets, nbAretes) {
   sommets.forEach(sommet => {
     graphe.set(sommet,[]);
   });
-  console.log(graphe)
+  shuffle(sommets);
 
   // -----------------------------
   // Étape 1 :
@@ -58,8 +70,8 @@ function genererGraphe(nbSommets, nbAretes) {
 
     nombreActuelAretes++;
   }
-  console.log(graphe);
-  console.log(nombreActuelAretes);
+  //console.log(graphe);
+  //console.log(nombreActuelAretes);
   // -----------------------------
   // Étape 2 :
   // Ajout d'arêtes aléatoires
