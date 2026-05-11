@@ -20,26 +20,31 @@ document.querySelector("#abandon").addEventListener('click',()=>{
 })
 document.querySelector('.game-form').addEventListener('submit', async function (event) {
   event.preventDefault();
-  let playername = document.querySelector("#playername").value;
-  let difficulty = document.querySelector("#difficulty").value;
-  let imageset = document.querySelector("#imageset").value;
-  let gamemode = document.querySelector("#gamemode").value;
-  let hardcore = document.querySelector("#hardcore").checked;
+  console.log(event.target)
+  let formData = new FormData(document.querySelector(".game-form"));
+  console.log(formData)
+  for (const [key,value] of formData){
+    console.log(key,value)
+  }
+  const settings = Object.fromEntries(formData);
+  settings["hardcore"] = settings["hardcore"]==="on";
+  console.log(settings)
+
   // Todo À compléter
 
   try {
     // Todo Spécifier les paramètres de createGame()
-    const data = await ApiService.createGame(playername,Number(difficulty));
+    const data = await ApiService.createGame(settings.playername,Number(settings.difficulty));
     console.log('Success:', data, data.id);
-    console.log(hardcore)
-    game.startGame(data.id,gamemode,Number(difficulty),hardcore);
-    if (hardcore){
+    // game.startGame(data.id,gamemode,Number(difficulty),hardcore);
+    game.startGame(data.id,settings);
+    if (settings.hardcore){
       document.addEventListener("wrong-pair",(event)=>{game.failedAttempt()})
     }
     document.querySelector(".game-area").classList.toggle("hidden")
-    switch (gamemode){
+    switch (settings.gamemode){
       case ("regular"):{
-        game.setImage(imageset)
+        // game.setImage(imageset)
         domManager.createCards(game.getImage());
         document.querySelector(".game-board").classList.toggle("hidden")
         document.querySelector(".setup-form").classList.toggle("hidden");

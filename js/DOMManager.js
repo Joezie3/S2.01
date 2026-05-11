@@ -22,7 +22,7 @@ class Chronometer{
 }
 
 export class DOMManager {
-  chrono = new Chronometer();
+  chrono;
   enabled = false;
   graphe;
   /**
@@ -31,6 +31,7 @@ export class DOMManager {
   game;
   constructor(game) {
     this.game = game;
+    this.chrono = new Chronometer();
   }
   enable(){
     this.enabled = true;
@@ -51,7 +52,7 @@ export class DOMManager {
   handleCardResult(result){
     switch (result.type){
       case ("first-selection"):{
-        this.flipCard(document.querySelector(`.card[data-index="${result.card.index}"]`))
+        this.flipCard(document.querySelector(`.card[data-index="${result.element.index}"]`))
         break;
       }
       case ("wrong-pair"):{
@@ -81,12 +82,12 @@ export class DOMManager {
     }
   }
   clickCard(event){
+    this.chrono.start()
     const card = event.target.closest("div.card");
     if (card.classList.contains("found")){
-      console.log("FOUND")
       return;
     }
-    const result = this.game.selectCard({index:card.dataset["index"],id : card.dataset["id"]});
+    const result = this.game.selectElement({index:card.dataset["index"],id : card.dataset["id"]});
     this.handleCardResult(result);
   }
   /**
@@ -100,8 +101,12 @@ export class DOMManager {
     document.querySelector(`.sommet[data-node=${node}]`).classList.add("found")
   }
   clickNode(event){
+    this.chrono.start();
     const node = event.target.dataset.node;
-    const result = this.game.selectNode(node);
+    if (event.target.classList.contains("found")){
+      return;
+    }
+    const result = this.game.selectElement(node);
     console.log(result)
     this.handleGraphResult(result);
   }
@@ -121,7 +126,7 @@ export class DOMManager {
   handleGraphResult(result){
     switch(result.type){
       case("first-selection"):{
-        this.highlightNode(result.node); break
+        this.highlightNode(result.element); break
       }
       case("correct-pair"):{
         this.highlightNode(result.first)

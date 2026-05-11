@@ -24,26 +24,26 @@
 </template>
 <div class="setup-form">
   <h2>Démarrer une nouvelle partie</h2>
-  <form class="game-form">
+  <form class="game-form" method="post" action="" name="game-form">
     <label for="playername">Nom du joueur</label>
-    <input type="text" id="playername">
+    <input type="text" id="playername" name="playername">
     <label for="difficulty">Difficulté</label>
-    <select id="difficulty">
+    <select id="difficulty" name="difficulty">
       <option value="4">4</option>
       <option value="5">5</option>
       <option value="6">6</option>
       <option value="8">8</option>
     </select>
     <label for="imageset">Set d'images</label>
-    <select id="imageset">
+    <select id="imageset" name="imageset">
       <option value="animals">Animaux</option>
       <option value="cars">Voitures</option>
       <option value="fruits">Fruits</option>
     </select>
     <label title="Le mode élimination autorise le joueur à faire trois erreurs, une fois les 3 erreurs commises, la partie est terminée." for="hardcore">Mode élimination (?)</label>
-    <input id="hardcore" type="checkbox">
+    <input id="hardcore" type="checkbox" name="hardcore">
     <label for="gamemode">Mode de jeu</label>
-    <select id="gamemode">
+    <select id="gamemode" name="gamemode">
       <option value="regular">Memory classique</option>
       <option value="graphe">Memory graphe</option>
     </select>

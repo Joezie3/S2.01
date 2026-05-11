@@ -13,6 +13,14 @@ export function shuffle(array) {
             array[randomIndex], array[currentIndex]];
     }
 }
+export class Aleatoire{
+    static entierAleatoireEntre(min,max){
+        return Math.floor(Math.random() * (max-min)+min);
+    }
+    static entierAleatoireMax(max){
+        return this.entierAleatoireEntre(0,max);
+    }
+}
 export function entierAleatoire(max) {
     return Math.floor(Math.random() * max);
 }
