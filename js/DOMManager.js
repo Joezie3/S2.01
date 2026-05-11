@@ -1,20 +1,5 @@
 import {Game} from "./Game.js";
 import {shuffle} from "./Utils.js";
-class PairFound extends CustomEvent{
-  constructor(first,second) {
-    super("pair-discovered",{
-      detail:{
-        firstElement : first,
-        secondElement:second
-      }
-    });
-  }
-}
-class WrongPair extends CustomEvent{
-  constructor() {
-    super("wrong-pair");
-  }
-}
 class Chronometer{
   startTime;
   started;
@@ -63,67 +48,47 @@ export class DOMManager {
     setTimeout(()=>{card.classList.toggle(color);card.classList.toggle("pulsing")},1000)
 
   }
-
-
   handleCardResult(result){
+    switch (result.type){
+      case ("first-selection"):{
+        this.flipCard(document.querySelector(`.card[data-index="${result.card.index}"]`))
+        break;
+      }
+      case ("wrong-pair"):{
+        let firstCard = document.querySelector(`.card[data-index="${result.first.index}"]`);
+        let secondCard = document.querySelector(`.card[data-index="${result.second.index}"]`)
+        this.disable();
+        this.flipCard(secondCard)
+        this.pulse(firstCard);
+        this.pulse(secondCard)
 
+        setTimeout(()=>{
+          this.flipCard(firstCard)
+          this.flipCard(secondCard)
+          this.enable()
+        },1000)
+        break
+      }
+      case ("correct-pair"):{
+        let firstCard = document.querySelector(`.card[data-index="${result.first.index}"]`);
+        let secondCard = document.querySelector(`.card[data-index="${result.second.index}"]`);
+        this.flipCard(secondCard);
+        firstCard.classList.add("found");
+        secondCard.classList.add("found")
+        this.pulse(firstCard,true);
+        this.pulse(secondCard,true)
+      }
+    }
   }
-  /**
-   * @param {Event}event
-   */
-  clickImage(event){
-    if (!this.enabled){ // Si les actions sont interdites, on ne réagit pas
+  clickCard(event){
+    const card = event.target.closest("div.card");
+    if (card.classList.contains("found")){
+      console.log("FOUND")
       return;
     }
-    this.chrono.start(); // On lance le chronomètre lorsque la première carte est cliqué. Le chronomètre vérifie qu'il n'est pas déjà lancé, donc les cartes suivantes n'auront pas d'impact dessus.
-    let card = event.target.closest(".card");
-    if (card.classList.contains("found") || card.classList.contains("selected")){ // Si la carte est déjà retournée, on ne fait rien
-
-    }
-    else{
-      this.flipCard(card)
-
-      let secondCard;
-      for (let tempCard of document.querySelectorAll(".card")){
-        if (tempCard.classList.contains("selected")){
-          secondCard = tempCard;
-          break;
-        }
-      }
-      if (secondCard != null){ // Si c'est la deuxième carte qu'on retourne, on effectue les vérifications
-        this.disable(); // On désactive les actions pour éviter que les joueurs clique sur toutes les cartes à la fois avant même qu'elles n'aient pu être retournées pour les cacher.
-        console.log("Seconde carte")
-        console.log(card)
-        secondCard.classList.toggle("selected");
-        if (card.dataset["id"] === secondCard.dataset["id"]){
-          console.log("Bonne paire");
-          secondCard.classList.toggle("found");
-          card.classList.toggle("found")
-          this.pulse(card,true);
-          this.pulse(secondCard,true)
-          this.enable(); // Si les cartes sont identiques, le joueur peut directement continuer de retourner
-          document.dispatchEvent(new PairFound(card.dataset["id"]))
-        }
-        else{
-          console.log("Mauvaise paire")
-
-          this.pulse(card);
-          this.pulse(secondCard);
-          setTimeout(()=>{
-            this.flipCard(secondCard);
-            this.flipCard(card);
-            this.enable(); // Si les cartes étaient différentes, on attend qu'elles soient de nouveaux cachées pour laisser le joueur jouer.
-            document.dispatchEvent(new WrongPair());
-          },1000)
-        }
-      }
-      else{
-        console.log("Première carte")
-        card.classList.toggle("selected")
-      }
-    }
+    const result = this.game.selectCard({index:card.dataset["index"],id : card.dataset["id"]});
+    this.handleCardResult(result);
   }
-
   /**
    * Met en surbrillance un noeud
    * @param {string} node Le nom du sommet
@@ -181,14 +146,16 @@ export class DOMManager {
       this.disable();
     }
   }
-  createCard(image){
+
+  createCard(image,cardIndex){
     const cardTemplate = document.querySelector("#cardTemplate");
     let card = cardTemplate.content.cloneNode(true).querySelector(".card");
     card.dataset["id"] = `${image.id}`;
+    card.dataset["index"] = cardIndex;
     let img = card.querySelector(".card-back img");
     img.setAttribute("src",image.url);
     img.setAttribute("alt",image.name);
-    card.querySelector(".card-inner").addEventListener("click",(event)=>{this.clickImage(event)});
+    card.querySelector(".card-inner").addEventListener("click",(event)=>{if (this.enabled){this.clickCard(event)}});
     return card;
   }
   /**
@@ -199,9 +166,10 @@ export class DOMManager {
 
     const gameBoard = document.querySelector('.game-board');
     const cardElements = [];
+    let cardIndex = 0;
     for (let image of images){
-      cardElements.push(this.createCard(image));
-      cardElements.push(this.createCard(image));
+      cardElements.push(this.createCard(image,cardIndex++));
+      cardElements.push(this.createCard(image,cardIndex++));
     }
     shuffle(cardElements);
     for (let image of cardElements){

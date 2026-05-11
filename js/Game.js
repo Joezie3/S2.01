@@ -1,12 +1,9 @@
 import {imageCollections} from './ImageCollection.js';
 import {ApiService} from './ApiService.js';
-import {shuffle} from "./Utils.js";
+import {shuffle,entierAleatoire} from "./Utils.js";
 
-function entierAleatoire(max) {
-  return Math.floor(Math.random() * max);
-}
+
 function genererGraphe(nbSommets, nbAretes) {
-
   // -----------------------------
   // Sécurité :
   // un graphe connexe avec N sommets
@@ -30,7 +27,7 @@ function genererGraphe(nbSommets, nbAretes) {
   // -----------------------------
   /**
    *
-   * @type {Map<string, Array<String>>}
+   * @type {Map<string, Array<string>>}
    */
   const graphe = new Map();
 
@@ -107,6 +104,7 @@ export class Game {
   #gamemode
   #remainingAttempts
   #selectedNode = null;
+  #selectedCard = null;
   #grapheDiscovered = new Map;
   graphe;
   discoveredGraphe = new Map();
@@ -167,6 +165,37 @@ export class Game {
     if (this.#remainingAttempts===0 && this.#hardcore){
       console.log("FIN DE LA PARTIE HARDCORE")
       document.dispatchEvent(new FinPartie("no-remaining-attempts"))
+    }
+  }
+  selectCard(card){
+    console.log(card.index,card.id);
+    if (this.#selectedCard===null){
+      this.#selectedCard = card;
+      return {
+        type:"first-selection",
+        card
+      }
+    }
+    const first = this.#selectedCard;
+    const second = card;
+    this.#selectedCard = null;
+    if (first.index===second.index){
+      this.#selectedCard = first;
+      return {type:"invalid"}
+    }
+    const correct = first.id === second.id;
+    if (!correct){
+      this.failedAttempt();
+      return {
+        type:"wrong-pair",
+        first,
+        second
+      }
+    }
+    return{
+      type:"correct-pair",
+      first,
+      second
     }
   }
   isDiscovered(node){

@@ -13,3 +13,6 @@ export function shuffle(array) {
             array[randomIndex], array[currentIndex]];
     }
 }
+export function entierAleatoire(max) {
+    return Math.floor(Math.random() * max);
+}
