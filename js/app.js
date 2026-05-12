@@ -6,7 +6,6 @@ import {ApiService} from './ApiService.js';
 const game = new Game();
 const domManager = new DOMManager(game);
 document.addEventListener("gameEnd",(event)=>{
-  console.log(game.state)
   if (game.state!=="ended") {
     console.log("Fin de la partie, raison :" + event.detail.reason);
     domManager.chrono.stop();

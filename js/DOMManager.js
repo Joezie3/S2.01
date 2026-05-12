@@ -91,6 +91,7 @@ export class DOMManager {
       return;
     }
     const result = this.game.selectElement({index:parseInt(card.dataset["index"]),id : parseInt(card.dataset["id"])});
+    console.log(result)
     this.handleCardResult(result);
 
   }

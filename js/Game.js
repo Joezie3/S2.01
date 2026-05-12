@@ -1,6 +1,7 @@
 import {imageCollections} from './ImageCollection.js';
 import {ApiService} from './ApiService.js';
 import {genererGraphe} from "./Graphe.js";
+import {entierAleatoire} from "./Utils.js";
 
 class FinPartie extends CustomEvent{
   constructor(reason) {
@@ -74,7 +75,8 @@ export class Game {
     this.#remainingAttempts=3;
 
     if (this.#settings.gamemode==="graphe"){
-      this.graphe = genererGraphe(this.#settings.difficulty,this.#settings.difficulty)
+      this.graphe = genererGraphe(entierAleatoire(this.#settings.difficulty-4)+4,this.#settings.difficulty)
+      this.#pairesrestantes = this.#settings.difficulty;
       for (let sommet of this.graphe.keys()){
         this.#grapheDiscovered.set(sommet,[]);
       }
@@ -129,6 +131,12 @@ export class Game {
    * @param {element} element
    * @returns {{type: string, first: null, second: *}|{type: string}|{type: string, first: null, second: *}|{type: string, first: null}|{type: string, element: *}|{type: string, first: null, second: *, first_discovered: boolean, second_discovered: boolean}}
    */
+  correctPair(){
+    this.#pairesrestantes--;
+    if (this.#pairesrestantes===0){
+      document.dispatchEvent(this.Fin("regular"))
+    }
+  }
   selectElement(element){
     if (this.#selectedElement===null){
       this.#selectedElement = element;
@@ -187,6 +195,10 @@ export class Game {
       }
     }
     let result = {type:"correct-pair",first,second};
+    this.correctPair();
+    if (this.#pairesrestantes === 0){
+      document.dispatchEvent(this.Fin("regular"));
+    }
     if (this.#settings.gamemode==="graphe"){
       return {...result,first_discovered:this.isDiscovered(first),
         second_discovered:this.isDiscovered(second)}
