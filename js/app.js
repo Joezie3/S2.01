@@ -45,7 +45,7 @@ document.querySelector('.game-form').addEventListener('submit', async function (
     switch (settings.gamemode){
       case ("regular"):{
         // game.setImage(imageset)
-        domManager.createCards(game.getImage());
+        domManager.createCards(game.getImages());
         document.querySelector(".game-board").classList.toggle("hidden")
         document.querySelector(".setup-form").classList.toggle("hidden");
         domManager.enable();

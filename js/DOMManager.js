@@ -39,8 +39,17 @@ export class DOMManager {
   disable(){
     this.enabled = false;
   }
-  flipCard(card){
-    card.classList.toggle("flip")
+  getCard(index){
+    return document.querySelector(`.card[data-index="${index}"]`)
+  }
+  /**
+   * Retourne une carte ou plusieurs cartes.
+   * @param {...HTMLDivElement} cards Elements div de class card à retourner.
+   */
+  flipCards(...cards){
+    for (let card of cards){
+      card.classList.toggle("flip")
+    }
   }
   pulse(card,correct){
     card.classList.toggle("pulsing");
@@ -50,34 +59,28 @@ export class DOMManager {
 
   }
   handleCardResult(result){
-    switch (result.type){
-      case ("first-selection"):{
-        this.flipCard(document.querySelector(`.card[data-index="${result.element.index}"]`))
-        break;
-      }
-      case ("wrong-pair"):{
-        let firstCard = document.querySelector(`.card[data-index="${result.first.index}"]`);
-        let secondCard = document.querySelector(`.card[data-index="${result.second.index}"]`)
-        this.disable();
-        this.flipCard(secondCard)
-        this.pulse(firstCard);
-        this.pulse(secondCard)
-
-        setTimeout(()=>{
-          this.flipCard(firstCard)
-          this.flipCard(secondCard)
-          this.enable()
-        },1000)
-        break
-      }
-      case ("correct-pair"):{
-        let firstCard = document.querySelector(`.card[data-index="${result.first.index}"]`);
-        let secondCard = document.querySelector(`.card[data-index="${result.second.index}"]`);
-        this.flipCard(secondCard);
-        firstCard.classList.add("found");
-        secondCard.classList.add("found")
-        this.pulse(firstCard,true);
-        this.pulse(secondCard,true)
+    if (result.type==="first-selection")this.flipCards(this.getCard(result.element.index))
+    else{
+      let firstCard = this.getCard(result.first.index);
+      let secondCard = this.getCard(result.second.index);
+      this.flipCards(secondCard);
+      switch (result.type){
+        case ("wrong-pair"):{
+          this.disable();
+          this.pulse(firstCard);
+          this.pulse(secondCard);
+          setTimeout(()=>{
+            this.flipCards(firstCard,secondCard);
+            this.enable()
+          },1000);
+          break;
+        }
+        case ("correct-pair"):{
+          firstCard.classList.add("found");
+          secondCard.classList.add("found");
+          this.pulse(firstCard,true);
+          this.pulse(secondCard,true);
+        }
       }
     }
   }
@@ -87,8 +90,9 @@ export class DOMManager {
     if (card.classList.contains("found")){
       return;
     }
-    const result = this.game.selectElement({index:card.dataset["index"],id : card.dataset["id"]});
+    const result = this.game.selectElement({index:parseInt(card.dataset["index"]),id : parseInt(card.dataset["id"])});
     this.handleCardResult(result);
+
   }
   /**
    * Met en surbrillance un noeud
@@ -151,7 +155,6 @@ export class DOMManager {
       this.disable();
     }
   }
-
   createCard(image,cardIndex){
     const cardTemplate = document.querySelector("#cardTemplate");
     let card = cardTemplate.content.cloneNode(true).querySelector(".card");
@@ -180,8 +183,6 @@ export class DOMManager {
     for (let image of cardElements){
       gameBoard.append(image);
     }
-
-
   }
   genererPositions(sommets, largeur, hauteur) {
     console.log(largeur,hauteur)
@@ -192,9 +193,7 @@ export class DOMManager {
 
     const marge = 60;
 
-    const rayon =
-        Math.min(largeur, hauteur) / 2 - marge;
-
+    const rayon = Math.min(largeur, hauteur) / 2 - marge;
 
     const angleStep = (2 * Math.PI) / sommets.length;
 
@@ -202,16 +201,8 @@ export class DOMManager {
       const angle = i * angleStep;
       const bruit = 30;
       positions[sommet] = {
-
-        x:
-            centreX +
-            Math.cos(angle) * rayon +
-            (Math.random() * bruit - bruit / 2),
-
-        y:
-            centreY +
-            Math.sin(angle) * rayon +
-            (Math.random() * bruit - bruit / 2)
+        x: centreX + Math.cos(angle) * rayon + (Math.random() * bruit - bruit / 2),
+        y: centreY + Math.sin(angle) * rayon + (Math.random() * bruit - bruit / 2)
       };
     });
     return positions;

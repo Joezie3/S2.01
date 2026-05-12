@@ -15,17 +15,27 @@ export class Game {
    * @type {number} id identifiant de la partie en cours
    */
   #id;
-
+  /**
+   * @type {settings}
+   */
   #settings
+  /**
+   * @type {Image}
+   */
   #images;
 
   #pairesrestantes
   #state
   #remainingAttempts
-  #selectedNode = null;
-  #selectedCard = null;
+  /**
+   * @type {null|element}
+   */
   #selectedElement = null;
-  #grapheDiscovered = new Map;
+  /**
+   *
+   * @type {Map<string, string[]>}
+   */
+  #grapheDiscovered = new Map();
   graphe;
   Fin(reason){
     return new FinPartie(reason);
@@ -75,12 +85,7 @@ export class Game {
     }
 
   }
-  setImage(setName){
-    // this.#setname  = setName;
-    this.#images = imageCollections[this.#settings.imageset].splice(this.#settings.difficulty)
-    this.#pairesrestantes = this.#settings.difficulty;
-  }
-  getImage(){
+  getImages(){
     return this.#images
   }
   get state(){
@@ -102,6 +107,28 @@ export class Game {
     }
     return true
   }
+
+  /**
+   * Indique si la paire d'éléments est correct.
+   * @param {element} first
+   * @param {element} second
+   * @return boolean
+   */
+  isCorrectPair(first,second){
+    switch (this.#settings.gamemode){
+      case ("regular"):{
+        return first.id === second.id;
+      }
+      case ("graphe"):{
+        return this.graphe.get(first).includes(second)
+      }
+    }
+  }
+  /**
+   *
+   * @param {element} element
+   * @returns {{type: string, first: null, second: *}|{type: string}|{type: string, first: null, second: *}|{type: string, first: null}|{type: string, element: *}|{type: string, first: null, second: *, first_discovered: boolean, second_discovered: boolean}}
+   */
   selectElement(element){
     if (this.#selectedElement===null){
       this.#selectedElement = element;
@@ -139,7 +166,7 @@ export class Game {
         break;
       }
     }
-    if (!correct){
+    if (!this.isCorrectPair(first,second)){
       this.failedAttempt();
       return {
         type:"wrong-pair",
