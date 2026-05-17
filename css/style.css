@@ -382,3 +382,143 @@ svg{
   flex:1;
   margin:-1px;
 }
+
+/* MODAL WINDOW*/
+.modal {
+  position: fixed;
+  inset: 0;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  background: rgba(0, 0, 0, 0.65);
+
+  backdrop-filter: blur(6px);
+
+  z-index: 9999;
+}
+.modal-content {
+  width: 90%;
+  max-width: 32rem;
+
+  background-color: var(--color-bg-panel);
+
+  border: 1px solid var(--color-border-input);
+
+  border-radius: 1rem;
+
+  padding: 2rem;
+
+  box-shadow:
+          0 10px 30px rgba(0,0,0,0.45);
+
+  animation: modal-appear 0.25s ease;
+}
+.modal-title {
+  font-size: 2rem;
+  font-weight: 700;
+
+  color: var(--color-text-title);
+
+  margin-bottom: 1rem;
+
+  text-align: center;
+}
+.modal-message {
+  color: var(--color-text-heading);
+
+  text-align: center;
+
+  margin-bottom: 2rem;
+
+  line-height: 1.5;
+}
+.modal-stats {
+  display: grid;
+
+  grid-template-columns:
+    repeat(auto-fit, minmax(120px, 1fr));
+
+  gap: 1rem;
+
+  margin-bottom: 2rem;
+}
+.modal-stat {
+  background-color: var(--color-bg-input);
+
+  border-radius: 0.75rem;
+
+  padding: 1rem;
+
+  text-align: center;
+}
+.modal-stat .label {
+  display: block;
+
+  font-size: 0.85rem;
+
+  color: var(--color-text-label);
+
+  margin-bottom: 0.5rem;
+}
+.modal-stat span:last-child {
+  font-size: 1.25rem;
+
+  font-weight: 700;
+
+  color: var(--color-text-heading);
+}
+.modal-actions {
+  display: flex;
+
+  justify-content: center;
+
+  gap: 1rem;
+}
+.modal-actions button {
+  border: none;
+
+  border-radius: 0.5rem;
+
+  padding: 0.75rem 1.25rem;
+
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+          background-color 0.2s,
+          transform 0.15s;
+}
+.modal-actions button:hover {
+  transform: translateY(-2px);
+}
+#restart-button {
+  background-color: var(--color-btn-primary);
+  color: white;
+}
+#restart-button:hover {
+  background-color: var(--color-btn-primary-hover);
+}
+#close-modal-button {
+  background-color: var(--color-btn-danger);
+  color: white;
+}
+#close-modal-button:hover {
+  background-color: var(--color-btn-danger-hover);
+}
+@keyframes modal-appear {
+  from {
+    opacity: 0;
+    transform:
+            translateY(20px)
+            scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform:
+            translateY(0)
+            scale(1);
+  }
+}

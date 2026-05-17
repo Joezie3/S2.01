@@ -1,7 +1,7 @@
 import {imageCollections} from './ImageCollection.js';
 import {ApiService} from './ApiService.js';
 import {genererGraphe} from "./Graphe.js";
-import {entierAleatoire} from "./Utils.js";
+import {Chronometer, Aleatoire, entierAleatoire} from "./Utils.js";
 
 class FinPartie extends CustomEvent{
   constructor(reason) {
@@ -9,7 +9,6 @@ class FinPartie extends CustomEvent{
       reason:reason
       }});
   }
-
 }
 export class Game {
   /**
@@ -20,11 +19,13 @@ export class Game {
    * @type {settings}
    */
   #settings
+  get settings(){
+    return Object.freeze(this.#settings);
+  }
   /**
-   * @type {Image}
+   * @type {Image[]}
    */
   #images;
-
   #pairesrestantes
   #state
   #remainingAttempts
@@ -37,17 +38,33 @@ export class Game {
    * @type {Map<string, string[]>}
    */
   #grapheDiscovered = new Map();
+  #attemps;
+   get attemps(){
+    return this.#attemps
+  }
+  newAttempts(){
+     this.#attemps ++;
+  }
   graphe;
+  /**
+   * @type {Chronometer}
+   */
+  chrono;
+  constructor() {
+    this.chrono = new Chronometer();
+  }
   Fin(reason){
     return new FinPartie(reason);
   }
   async endGame() {
     // Todo À compléter
     if (this.#state !== "ended") {
+      this.chrono.stop();
       this.#state = "ended"
       try {
         const result = await ApiService.updateGameResult(this.#id, this.#pairesrestantes);
         console.log('Fin de partie:', result);
+        return result
       } catch (error) {
         console.error('Error:', error);
         alert(error.message || 'Erreur lors de la fin de la partie');
@@ -55,7 +72,6 @@ export class Game {
 
     }
   }
-
   // /**
   //  * Start a new game.
   //  * @param {number} id - The game ID.
@@ -66,16 +82,16 @@ export class Game {
   /**
    * Start a new game.
    * @param {number} id - The game ID.
-   * @param {{playername:string,difficulty:number,gamemode:string,imageset:string,hardcore:boolean}} settings
+   * @param {settings} settings Les paramètres de la partie (mode de jeu, difficulté, etc...)
    */
   startGame(id,settings) {
     this.#id = id;
     this.#state = "started"
     this.#settings = settings;
     this.#remainingAttempts=3;
-
+    this.#attemps = 0;
     if (this.#settings.gamemode==="graphe"){
-      this.graphe = genererGraphe(entierAleatoire(this.#settings.difficulty-4)+4,this.#settings.difficulty)
+      this.graphe = genererGraphe(Aleatoire.entierAleatoireEntre(4,this.#settings.difficulty),this.#settings.difficulty)
       this.#pairesrestantes = this.#settings.difficulty;
       for (let sommet of this.graphe.keys()){
         this.#grapheDiscovered.set(sommet,[]);
@@ -94,6 +110,7 @@ export class Game {
     return this.#state;
   }
   failedAttempt(){
+    this.newAttempts();
     this.#remainingAttempts-=1;
     if (this.#remainingAttempts===0 && this.#settings.hardcore){
       console.log("FIN DE LA PARTIE HARDCORE")
@@ -132,61 +149,48 @@ export class Game {
    * @returns {{type: string, first: null, second: *}|{type: string}|{type: string, first: null, second: *}|{type: string, first: null}|{type: string, element: *}|{type: string, first: null, second: *, first_discovered: boolean, second_discovered: boolean}}
    */
   correctPair(){
+    this.newAttempts();
     this.#pairesrestantes--;
     if (this.#pairesrestantes===0){
       document.dispatchEvent(this.Fin("regular"))
     }
   }
   selectElement(element){
+    this.chrono.start();
     if (this.#selectedElement===null){
       this.#selectedElement = element;
       return{
-        type:"first-selection",
-        element
+        type:"first-selection", element
       }
     }
     const first = this.#selectedElement;
     const second = element;
     this.#selectedElement = null;
     let same = false;
-    switch (this.#settings.gamemode){
+    switch (this.#settings.gamemode){ // Est-ce que le joueur a cliqué deux fois sur le même élément
       case ("regular"):{
-        same = first.index === second.index;
+        same = first.index === second.index; // Pour le memory classique, les éléments cartes ont des index, si l'index est le même, il a cliqué deux fois sur le même élément
         break
       }
       case ("graphe"):{
-        same = first === second;
+        same = first === second; // Pour le graphe, si les deux sommets ont le même nom, il a cliqué sur le même sommet
         break;
       }
     }
-    if (same){
+    if (same){ //si c'est le cas, on ne le compte pas comme une tentative et on fait comme si il n'avait pas recliqué
       this.#selectedElement = first;
       return {type:"invalid"}
-    }
-    let correct;
-    switch(this.#settings.gamemode){
-      case ("regular"):{
-        correct = first.id === second.id;
-        break;
-      }
-      case ("graphe"):{
-        correct = this.graphe.get(first).includes(second);
-        break;
-      }
     }
     if (!this.isCorrectPair(first,second)){
       this.failedAttempt();
       return {
-        type:"wrong-pair",
-        first,
-        second
+        type:"wrong-pair", first, second
       }
     }
     if (this.#settings.gamemode==="graphe"){
       if(this.#grapheDiscovered.get(first).includes(second)){
         return {
-          type: "already-found",
-          first
+          type: "already-found", first
         }
       }
       else{
@@ -200,7 +204,9 @@ export class Game {
       document.dispatchEvent(this.Fin("regular"));
     }
     if (this.#settings.gamemode==="graphe"){
-      return {...result,first_discovered:this.isDiscovered(first),
+      return {
+        ...result,
+        first_discovered:this.isDiscovered(first),
         second_discovered:this.isDiscovered(second)}
     }
     return result;

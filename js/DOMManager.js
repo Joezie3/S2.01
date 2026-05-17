@@ -1,28 +1,7 @@
 import {Game} from "./Game.js";
-import {shuffle} from "./Utils.js";
-class Chronometer{
-  startTime;
-  started;
-  stopped;
-  intervalId;
-  updateTime(){
-    document.querySelector(".game-timer").innerText = (new Date(Date.now()).getTime() - this.startTime.getTime())/1000;
-  }
-  start(){
-    if (!this.started) {
-      this.startTime = new Date(Date.now());
-      this.started = true;
-      this.intervalId = setInterval(()=>{this.updateTime()}, 100);
-    }
-  }
-  stop(){
-    clearInterval(this.intervalId);
-    this.stopped = true;
-  }
-}
+import {shuffle,Subject} from "./Utils.js";
 
 export class DOMManager {
-  chrono;
   enabled = false;
   graphe;
   /**
@@ -31,7 +10,6 @@ export class DOMManager {
   game;
   constructor(game) {
     this.game = game;
-    this.chrono = new Chronometer();
   }
   enable(){
     this.enabled = true;
@@ -85,7 +63,6 @@ export class DOMManager {
     }
   }
   clickCard(event){
-    this.chrono.start()
     const card = event.target.closest("div.card");
     if (card.classList.contains("found")){
       return;
@@ -106,7 +83,6 @@ export class DOMManager {
     document.querySelector(`.sommet[data-node=${node}]`).classList.add("found")
   }
   clickNode(event){
-    this.chrono.start();
     const node = event.target.dataset.node;
     if (event.target.classList.contains("found")){
       return;
@@ -208,6 +184,31 @@ export class DOMManager {
     });
     return positions;
   }
+  showModal(result,reason){
+    const modal = document.querySelector("#endgame-modal");
+    modal.querySelector("#modal-time").innerText = this.game.chrono.time;
+    modal.querySelector("#modal-score").innerText = result.score;
+    modal.querySelector("#modal-attemps").innerText = this.game.attemps;
+    modal.querySelector("#modal-difficulty").innerText = this.game.settings.difficulty
+    modal.querySelector("#modal-mode").innerText = this.game.settings.gamemode === "regular"?"Memory":"Graphe"
+    let message;
+    switch (reason){
+      case ("regular"):{
+        message = "Bravo ! Vous avez gagné";break
+      }
+      case ("no-remaining-attempts"):{
+        message = "Dommage ! Vous avez épuisé toutes vos tentatives";break;
+      }
+      case ("abandon"):{
+        message = "Vous avez abandonné !";break;
+      }
+    }
+    modal.querySelector(".modal-message").innerText = message;
+    modal.classList.remove("hidden");
+  }
+  closeModal(){
+    const modal = document.querySelector("#endgame-modal").classList.add("hidden");
+  }
   createGraphe(graphe){
     let grapheElement = document.querySelector("#graphe");
     const positions = this.genererPositions(Array.from(graphe.keys()),document.querySelector(".game-area-header").clientWidth,400);
@@ -230,7 +231,6 @@ export class DOMManager {
               "http://www.w3.org/2000/svg",
               "line"
           );
-
           ligne.dataset["nodes"] = edge_string;
           ligne.classList.add("hidden")
           ligne.setAttribute("x1", positions[sommet].x + 25);

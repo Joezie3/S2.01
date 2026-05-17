@@ -1,19 +1,20 @@
 import {DOMManager} from './DOMManager.js';
 import {Game} from './Game.js';
 import {ApiService} from './ApiService.js';
+import {Chronometer,ObserverElement} from './Utils.js';
 
 
 const game = new Game();
 const domManager = new DOMManager(game);
-document.addEventListener("gameEnd",(event)=>{
+document.addEventListener("gameEnd",async (event)=>{
   if (game.state!=="ended") {
     console.log("Fin de la partie, raison :" + event.detail.reason);
-    domManager.chrono.stop();
     domManager.disable();
-    game.endGame();
+    let result = await game.endGame();
+    domManager.showModal(result,event.detail.reason);
   }
 })
-
+document.querySelector("#close-modal-button").addEventListener("click",()=>{domManager.closeModal()})
 document.querySelector("#abandon").addEventListener('click',()=>{
   document.dispatchEvent(game.Fin("abandon"));
 })
@@ -41,9 +42,11 @@ document.querySelector('.game-form').addEventListener('submit', async function (
       document.addEventListener("wrong-pair",(event)=>{game.failedAttempt()})
     }
     document.querySelector(".game-area").classList.toggle("hidden")
+    const gameTimer = document.querySelector(".game-timer");
+    game.chrono.subscribe(new ObserverElement(gameTimer));
+
     switch (settings.gamemode){
       case ("regular"):{
-        // game.setImage(imageset)
         domManager.createCards(game.getImages());
         document.querySelector(".game-board").classList.toggle("hidden")
         document.querySelector(".setup-form").classList.toggle("hidden");

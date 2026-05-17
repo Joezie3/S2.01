@@ -8,6 +8,38 @@
   <script src="js/app.js" type="module"></script>
 </head>
 <body>
+<div id="endgame-modal" class="modal hidden">
+  <div class="modal-content">
+    <h2 class="modal-title">Fin de la partie</h2>
+    <p class="modal-message">Bravo ! Vous avez terminé la partie.</p>
+    <div class="modal-stats">
+      <div class="modal-stat">
+        <span class="label">Temps</span>
+        <span id="modal-time">00:00</span>
+      </div>
+      <div class="modal-stat">
+        <span class="label">Score</span>
+        <span id="modal-score">0</span>
+      </div>
+      <div class="modal-stat">
+        <span class="label">Tentatives</span>
+        <span id="modal-attemps">0</span>
+      </div>
+      <div class="modal-stat">
+        <span class="label">Difficulté</span>
+        <span id="modal-difficulty">0</span>
+      </div>
+      <div class="modal-stat">
+        <span class="label">Mode</span>
+        <span id="modal-mode">Memory</span>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button id="restart-button">Rejouer</button>
+      <button id="close-modal-button">Fermer</button>
+    </div>
+  </div>
+</div>
 <header><h1>Jeu de Memory</h1></header>
 <template id="cardTemplate">
   <div class="card">
