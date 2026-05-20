@@ -28,17 +28,21 @@
   --color-btn-danger: oklch(0.577 0.215 27.325);
   --color-btn-danger-hover: oklch(0.505 0.19 27.518);
 
+  --color-btn-modal : oklch(0.74 0.1085 214.94);
+  --color-btn-modal-hover : oklch(0.8471 0.1135 214.94);
+
+  --color-btn-main: oklch(0.8029 0.1011 299.65);
+  --color-btn-main-hover: oklch(0.6353 0.1949 299.65);
+
   /* Chronomètre */
   --color-timer: oklch(0.773 0.153 163.223);
 }
-
 /* ── Reset & base ── */
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
-
 body {
   display: flex;
   flex-direction: column;
@@ -49,7 +53,6 @@ body {
   padding: 1rem;
   font-family: sans-serif;
 }
-
 /* ── Header ── */
 header h1 {
   font-size: 2.25rem;
@@ -57,7 +60,6 @@ header h1 {
   color: var(--color-text-title);
   text-align: center;
 }
-
 /* ── Setup form panel ── */
 .setup-form {
   margin-top: 1.5rem;
@@ -68,21 +70,18 @@ header h1 {
   width: 100%;
   max-width: 56rem;
 }
-
 .setup-form h2 {
   font-size: 1.25rem;
   font-weight: 600;
   margin-bottom: 1rem;
   color: var(--color-text-heading);
 }
-
 /* ── Form ── */
 .game-form {
   display: flex;
   flex-direction: column;
   gap: 1rem;
 }
-
 .game-form label {
   display: block;
   font-size: 0.875rem;
@@ -90,7 +89,6 @@ header h1 {
   color: var(--color-text-label);
   margin-bottom: 0.25rem;
 }
-
 .game-form input,
 .game-form select {
   display: block;
@@ -115,7 +113,6 @@ header h1 {
   border-color: var(--color-border-input-focus);
   box-shadow: 0 0 0 2px var(--color-border-input);
 }
-
 .game-form button[type="submit"] {
   width: 100%;
   display: flex;
@@ -131,34 +128,43 @@ header h1 {
   cursor: pointer;
   outline: none;
 }
-
 .game-form button[type="submit"]:hover {
   background-color: var(--color-btn-primary-hover);
 }
-
 /* ── Game area ── */
 .game-area {
   width: 100%;
   max-width: 56rem;
   margin-top: 2rem;
 }
-
 .game-area-header {
   display: flex;
   align-items: center;
   justify-content: space-around;
   margin-bottom: 1rem;
 }
-
 .game-area-header h2 {
   font-size: 1.25rem;
   font-weight: 600;
   color: var(--color-text-heading);
 }
-
-#abandon {
+.game-button-area{
+  display:flex;
+  align-items: normal;
+  justify-content: space-around;
+}
+.game-button-area button {
   padding: 0.5rem 1rem;
-  background-color: var(--color-btn-danger);
+  margin:10px;
+  &#abandon {
+    background-color: var(--color-btn-danger);
+  }
+  &#restart-button{
+    background-color: var(--color-btn-primary);
+  }
+  &#show-result{
+    background-color: var(--color-btn-modal);
+  }
   color: var(--color-text-white);
   font-weight: 500;
   border: none;
@@ -167,24 +173,28 @@ header h1 {
   cursor: pointer;
   outline: none;
 }
-
-#abandon:hover {
-  background-color: var(--color-btn-danger-hover);
+.game-button-area button:hover{
+  &#restart-button{
+    background-color: var(--color-btn-primary-hover);
+  }
+  &#abandon{
+    background-color: var(--color-btn-danger-hover);
+  }
+  &#show-result{
+    background-color: var(--color-btn-modal-hover);
+  }
 }
-
 .game-timer {
   font-size: 1.125rem;
   font-family: monospace;
   color: var(--color-timer);
 }
-
 /* ── Game board (CSS Grid) ── */
 .game-board {
   display: grid;
   gap: 1rem;
   justify-items: center;
   grid-template-columns: repeat(4, 1fr);
-
 }
 .graphe-board{
   border-radius: 0.5em;
@@ -193,12 +203,10 @@ header h1 {
 .game-board.cols-5 {
   grid-template-columns: repeat(5, 1fr);
 }
-
 /* ── Hidden utility ── */
 .hidden {
   display: none !important;
 }
-
 /* ── Cards ── */
 .card {
   perspective: 1000px;
@@ -208,14 +216,12 @@ header h1 {
   border-radius: 0.5rem;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
 }
-
 @media (min-width: 768px) {
   .card {
     width: 10rem;
     height: 10rem;
   }
 }
-
 .card-inner {
   position: relative;
   width: 100%;
@@ -223,11 +229,9 @@ header h1 {
   transition: transform 0.6s;
   transform-style: preserve-3d;
 }
-
 .card.flip .card-inner {
   transform: rotateY(180deg);
 }
-
 .card-front,
 .card-back {
   position: absolute;
@@ -330,34 +334,6 @@ header h1 {
     box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
   }
 }
-
-/*#graphe {*/
-/*  position: relative;*/
-/*  display:flex;*/
-/*  border: 1px solid black;*/
-/*}*/
-
-/*.sommet {*/
-/*  position: absolute;*/
-/*  width: 50px;*/
-/*  height: 50px;*/
-/*  border-radius: 50%;*/
-/*  background: royalblue;*/
-/*  color: white;*/
-
-/*  display: flex;*/
-/*  justify-content: center;*/
-/*  align-items: center;*/
-
-/*  cursor: pointer;*/
-/*}*/
-/*svg{*/
-/*  position:relative;*/
-/*  box-sizing: content-box;*/
-/*  height:100vh;*/
-/*  width:100%;*/
-/*}*/
-
 #graphe {
   position: relative;
   height: 400px;
@@ -391,126 +367,96 @@ svg{
 .modal {
   position: fixed;
   inset: 0;
-
   display: flex;
   justify-content: center;
   align-items: center;
-
   background: rgba(0, 0, 0, 0.65);
-
   backdrop-filter: blur(6px);
-
   z-index: 9999;
 }
 .modal-content {
   width: 90%;
   max-width: 32rem;
-
   background-color: var(--color-bg-panel);
-
   border: 1px solid var(--color-border-input);
-
   border-radius: 1rem;
-
   padding: 2rem;
-
-  box-shadow:
-          0 10px 30px rgba(0,0,0,0.45);
-
+  box-shadow: 0 10px 30px rgba(0,0,0,0.45);
   animation: modal-appear 0.25s ease;
 }
 .modal-title {
   font-size: 2rem;
   font-weight: 700;
-
   color: var(--color-text-title);
-
   margin-bottom: 1rem;
-
   text-align: center;
 }
 .modal-message {
   color: var(--color-text-heading);
-
   text-align: center;
-
   margin-bottom: 2rem;
-
   line-height: 1.5;
 }
 .modal-stats {
   display: grid;
-
   grid-template-columns:
     repeat(auto-fit, minmax(120px, 1fr));
-
   gap: 1rem;
-
   margin-bottom: 2rem;
 }
 .modal-stat {
   background-color: var(--color-bg-input);
-
   border-radius: 0.75rem;
-
   padding: 1rem;
-
   text-align: center;
 }
 .modal-stat .label {
   display: block;
-
   font-size: 0.85rem;
-
   color: var(--color-text-label);
-
   margin-bottom: 0.5rem;
 }
 .modal-stat span:last-child {
   font-size: 1.25rem;
-
   font-weight: 700;
-
   color: var(--color-text-heading);
 }
 .modal-actions {
   display: flex;
-
   justify-content: center;
-
   gap: 1rem;
 }
 .modal-actions button {
+  &#restart-modal-button{
+    background-color: var(--color-btn-primary);
+    &:hover{
+      background-color: var(--color-btn-primary-hover);
+    }
+  }
+  &#close-modal-button{
+    background-color: var(--color-btn-danger);
+    &:hover{
+      background-color: var(--color-btn-danger-hover);
+    }
+  }
+  &#mainpage-modal-button{
+    background-color: var(--color-btn-main);
+    &:hover{
+      background-color: var(--color-btn-main-hover);
+    }
+  }
   border: none;
-
   border-radius: 0.5rem;
-
   padding: 0.75rem 1.25rem;
-
   font-weight: 600;
-
   cursor: pointer;
-
-  transition:
-          background-color 0.2s,
-          transform 0.15s;
+  transition: background-color 0.2s, transform 0.15s;
 }
 .modal-actions button:hover {
   transform: translateY(-2px);
 }
-#restart-button {
-  background-color: var(--color-btn-primary);
-  color: white;
-}
-#restart-button:hover {
-  background-color: var(--color-btn-primary-hover);
-}
-#close-modal-button {
-  background-color: var(--color-btn-danger);
-  color: white;
-}
-#close-modal-button:hover {
-  background-color: var(--color-btn-danger-hover);
+#close-modal-button, #restart-modal-button{
+  color:white;
 }
 @keyframes modal-appear {
   from {

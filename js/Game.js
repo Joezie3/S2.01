@@ -93,12 +93,13 @@ export class Game {
     if (this.#settings.gamemode==="graphe"){
       this.graphe = genererGraphe(Aleatoire.entierAleatoireEntre(4,this.#settings.difficulty),this.#settings.difficulty)
       this.#pairesrestantes = this.#settings.difficulty;
+      this.#grapheDiscovered = new Map()
       for (let sommet of this.graphe.keys()){
         this.#grapheDiscovered.set(sommet,[]);
       }
     }
     else{
-      this.#images = imageCollections[this.#settings.imageset].splice(0,this.#settings.difficulty);
+      this.#images = imageCollections[this.#settings.imageset].toSpliced(this.#settings.difficulty);
       this.#pairesrestantes = this.#settings.difficulty;
     }
 

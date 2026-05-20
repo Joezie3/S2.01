@@ -34,7 +34,81 @@ export class DOMManager {
     let color = correct?"right":"wrong";
     card.classList.toggle(color);
     setTimeout(()=>{card.classList.toggle(color);card.classList.toggle("pulsing")},1000)
+  }
+  resetAll(){
+    switch (this.game.settings.gamemode){
+      case ("regular"):{
+        const children = [...document.querySelector(".game-board").children];
+        for (let child of children){
+          child.remove();
+        }
+        document.querySelector(".game-board").classList.toggle("hidden");
+        break;
+      }
+      case("graphe"):{
+        const children = [...document.querySelector(".graphe-board").children];
+        for (let child of children){
+          child.remove();
+        }
+        document.querySelector(".graphe-board").classList.toggle("hidden")
+        break;
+      }
+    }
+    document.querySelector("#abandon").classList.remove("hidden");
+    document.querySelector("#show-result").classList.add("hidden");
+    this.toggleSetupMenu()
+    this.toggleGameArea();
+    this.toggleModal(false);
+  }
+  toggleSetupMenu(){
+    document.querySelector(".setup-form").classList.toggle("hidden");
+  }
+  endGame(result,reason){
+    const modal = document.querySelector("#endgame-modal");
+    modal.querySelector("#modal-time").innerText = this.game.chrono.time;
+    modal.querySelector("#modal-score").innerText = result.score;
+    modal.querySelector("#modal-attemps").innerText = this.game.attemps;
+    modal.querySelector("#modal-difficulty").innerText = this.game.settings.difficulty
+    modal.querySelector("#modal-mode").innerText = this.game.settings.gamemode === "regular"?"Memory":"Graphe"
+    let message;
+    switch (reason){
+      case ("regular"):{
+        message = "Bravo ! Vous avez gagné";break
+      }
+      case ("no-remaining-attempts"):{
+        message = "Dommage ! Vous avez épuisé toutes vos tentatives";break;
+      }
+      case ("abandon"):{
+        message = "Vous avez abandonné !";break;
+      }
+    }
+    modal.querySelector(".modal-message").innerText = message;
+    document.querySelector("#abandon").classList.add("hidden");
+    document.querySelector("#show-result").classList.remove("hidden");
+    this.toggleModal();
+  }
+  toggleGameArea(){
+    document.querySelector(".game-area").classList.toggle("hidden");
+  }
+  /**
+   *
+   * @param {boolean} state Visibilité de la fenetre
+   */
+  toggleModal(state = undefined){
+    const modal = document.querySelector("#endgame-modal");
+    if (state === undefined){
+      modal.classList.toggle("hidden");
+    }
+    else {
+      if (state===true){
+        modal.classList.remove("hidden");
+      }
+      else{
+        modal.classList.add("hidden");
+      }
+     // console.log(modal.classList.contains("hidden"))
 
+    }
   }
   handleCardResult(result){
     if (result.type==="first-selection")this.flipCards(this.getCard(result.element.index))
@@ -162,7 +236,7 @@ export class DOMManager {
     }
   }
   genererPositions(sommets, largeur, hauteur) {
-    console.log(largeur,hauteur)
+    // console.log(largeur,hauteur)
     const positions = {};
 
     const centreX = largeur / 2;
@@ -184,30 +258,19 @@ export class DOMManager {
     });
     return positions;
   }
-  showModal(result,reason){
-    const modal = document.querySelector("#endgame-modal");
-    modal.querySelector("#modal-time").innerText = this.game.chrono.time;
-    modal.querySelector("#modal-score").innerText = result.score;
-    modal.querySelector("#modal-attemps").innerText = this.game.attemps;
-    modal.querySelector("#modal-difficulty").innerText = this.game.settings.difficulty
-    modal.querySelector("#modal-mode").innerText = this.game.settings.gamemode === "regular"?"Memory":"Graphe"
-    let message;
-    switch (reason){
+
+  createBoard(){
+    switch (this.game.settings.gamemode){
       case ("regular"):{
-        message = "Bravo ! Vous avez gagné";break
+        this.createCards(this.game.getImages())
+        document.querySelector(".game-board").classList.toggle("hidden")
+        break;
       }
-      case ("no-remaining-attempts"):{
-        message = "Dommage ! Vous avez épuisé toutes vos tentatives";break;
-      }
-      case ("abandon"):{
-        message = "Vous avez abandonné !";break;
+      case ("graphe"):{
+        this.createGraphe(this.game.graphe)
+        document.querySelector(".graphe-board").classList.toggle("hidden");
       }
     }
-    modal.querySelector(".modal-message").innerText = message;
-    modal.classList.remove("hidden");
-  }
-  closeModal(){
-    const modal = document.querySelector("#endgame-modal").classList.add("hidden");
   }
   createGraphe(graphe){
     let grapheElement = document.querySelector("#graphe");

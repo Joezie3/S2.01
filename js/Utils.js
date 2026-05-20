@@ -64,13 +64,27 @@ export class ObserverElement{
         this.element.innerHTML = data;
     }
 }
+export function divmod(x,y){
+    return [Math.floor(x/y),x%y];
+}
+export function pad(n,nzero){
+    if (nzero - `${n}`.length <= 0){
+        return `${n}`
+    }
+    return "0"*(nzero - `${n}`.length) + `${n}`;
+}
 export class Chronometer extends Subject{
     startTime;
     stopTime;
     intervalId;
+
+    /**
+     * Renvoie le temps écoulé depuis le lancement du chronomètre (en secondes)
+     * @returns {number} Temps en seconde
+     */
     get time(){
         if (this.startTime===undefined){
-            return null
+            return 0/1000
         }
         if (this.stopTime===undefined) {
             return (new Date(Date.now()).getTime() - this.startTime) / 1000;
@@ -80,7 +94,11 @@ export class Chronometer extends Subject{
         }
     }
     updateTime(){
-        this.notify(this.time)
+        let m = 0,s = 0,ms = 0;
+        ms = Math.floor(this.time * 1000);
+        [s,ms] = divmod(ms,1000);
+        [m,s] = divmod(s,60);
+        this.notify(pad(m,2) + ":" + pad(s,2) + ":" + pad(ms,3))
     }
     start(){
         if (this.startTime===undefined) { // Si startTime n'est pas défini, le chronomètre n'a pas été lancé
@@ -94,14 +112,19 @@ export class Chronometer extends Subject{
             this.intervalId = setInterval(() => {this.updateTime()}, 100);
         }
     }
-    restart(){
+    reset(){
         this.startTime = undefined;
         this.stopTime = undefined;
-        this.start();
+        if (this.intervalId !==undefined){
+            clearInterval(this.intervalId);
+            this.intervalId = undefined;
+        }
+        this.updateTime();
     }
     stop(){
         if (this.stopTime===undefined) { // Si stopTime n'est pas défini, le chronomètre n'est pas arrêté
             clearInterval(this.intervalId); // On arrête la vérification périodique.
+            this.intervalId = undefined;
             this.updateTime(); // On actualise une dernière fois.
             this.stopTime = new Date(Date.now());
         }

@@ -11,23 +11,24 @@ document.addEventListener("gameEnd",async (event)=>{
     console.log("Fin de la partie, raison :" + event.detail.reason);
     domManager.disable();
     let result = await game.endGame();
-    domManager.showModal(result,event.detail.reason);
+    domManager.endGame(result,event.detail.reason);
   }
 })
 
-document.querySelector("#close-modal-button").addEventListener("click",()=>{domManager.closeModal()})
-document.querySelectorAll(".restart-button").forEach((btn)=>{btn.addEventListener("click",()=>{location.reload()})})
+document.querySelector("#close-modal-button").addEventListener("click",()=>{domManager.toggleModal()})
+document.querySelector("#show-result").addEventListener("click",()=>{domManager.toggleModal()});
+document.querySelector("#mainpage-modal-button").addEventListener("click",()=>{domManager.resetAll()})
 document.querySelector("#abandon").addEventListener('click',()=>{
   document.dispatchEvent(game.Fin("abandon"));
 })
 document.querySelector('.game-form').addEventListener('submit', async function (event) {
   event.preventDefault();
-  console.log(event.target)
+  // console.log(event.target)
   let formData = new FormData(document.querySelector(".game-form"));
-  console.log(formData)
-  for (const [key,value] of formData){
-    console.log(key,value)
-  }
+  // console.log(formData)
+  // for (const [key,value] of formData){
+  //   console.log(key,value)
+  // }
   const settings = Object.fromEntries(formData);
   settings["hardcore"] = settings["hardcore"]==="on";
   console.log(settings)
@@ -43,25 +44,14 @@ document.querySelector('.game-form').addEventListener('submit', async function (
     if (settings.hardcore){
       document.addEventListener("wrong-pair",(event)=>{game.failedAttempt()})
     }
-    document.querySelector(".game-area").classList.toggle("hidden")
+    domManager.toggleGameArea()
     const gameTimer = document.querySelector(".game-timer");
     game.chrono.subscribe(new ObserverElement(gameTimer));
-    switch (settings.gamemode){
-      case ("regular"):{
-        domManager.createCards(game.getImages());
-        document.querySelector(".game-board").classList.toggle("hidden")
-        document.querySelector(".setup-form").classList.toggle("hidden");
-        domManager.enable();
-        break;
-      }
-      case ("graphe"):{
-        document.querySelector(".setup-form").classList.toggle("hidden");
-        console.log("LOL" + game.graphe);
-        domManager.createGraphe(game.graphe)
-        domManager.enable();
-        document.querySelector(".graphe-board").classList.toggle("hidden");
-      }
-    }
+    game.chrono.reset()
+
+    domManager.createBoard()
+    domManager.enable()
+    domManager.toggleSetupMenu()
 
 
 

@@ -35,7 +35,8 @@
       </div>
     </div>
     <div class="modal-actions">
-      <button class="restart-button" id="restart-modal-button">Rejouer</button>
+      <button class="mainpage-modal-button" id="mainpage-modal-button">Retour au menu principal</button>
+      <button class="restart-modal-button" id="restart-modal-button">Recommencer (même paramètre)</button>
       <button id="close-modal-button">Fermer</button>
     </div>
   </div>
@@ -87,8 +88,11 @@
 <div class="game-area hidden">
   <div class="game-area-header">
     <h2 class="game-timer">00:00:00</h2>
-    <button id="abandon">Abandon</button>
-    <button class="restart-button">Recommencer</button>
+    <div class="game-button-area">
+      <button id="abandon">Abandon</button>
+      <button class="restart-button" id="restart-button">Recommencer</button>
+      <button id="show-result" class="hidden">Afficher les résultats</button>
+    </div>
   </div>
   <div class="graphe-board hidden" id="graphe">
     <svg id="liens"></svg>
