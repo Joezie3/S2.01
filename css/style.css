@@ -6,6 +6,7 @@
   --color-bg-input: oklch(0.551 0.023 264.364);
   --color-bg-card-front: oklch(0.372 0.039 257.287);
   --color-bg-card-back: oklch(1 0 89.876);
+  --color-bg-graphe : oklch(0.408 0.04 265.755);
 
   /* Bordures */
   --color-border-input: oklch(0.551 0.023 264.364);
@@ -185,7 +186,10 @@ header h1 {
   grid-template-columns: repeat(4, 1fr);
 
 }
-
+.graphe-board{
+  border-radius: 0.5em;
+  background-color: var(--color-bg-graphe);
+}
 .game-board.cols-5 {
   grid-template-columns: repeat(5, 1fr);
 }

@@ -15,6 +15,7 @@ document.addEventListener("gameEnd",async (event)=>{
   }
 })
 document.querySelector("#close-modal-button").addEventListener("click",()=>{domManager.closeModal()})
+document.querySelector("#restart-button").addEventListener("click",()=>{location.reload()})
 document.querySelector("#abandon").addEventListener('click',()=>{
   document.dispatchEvent(game.Fin("abandon"));
 })
@@ -44,7 +45,6 @@ document.querySelector('.game-form').addEventListener('submit', async function (
     document.querySelector(".game-area").classList.toggle("hidden")
     const gameTimer = document.querySelector(".game-timer");
     game.chrono.subscribe(new ObserverElement(gameTimer));
-
     switch (settings.gamemode){
       case ("regular"):{
         domManager.createCards(game.getImages());
