@@ -31,11 +31,11 @@
       </div>
       <div class="modal-stat">
         <span class="label">Mode</span>
-        <span id="modal-mode">Memory</span>
+        <span id="modal-mode"></span>
       </div>
     </div>
     <div class="modal-actions">
-      <button id="restart-button">Rejouer</button>
+      <button class="restart-button" id="restart-modal-button">Rejouer</button>
       <button id="close-modal-button">Fermer</button>
     </div>
   </div>
@@ -48,7 +48,7 @@
         <img src="./assets/images/mask1.jpg" draggable="false" alt="Hidden card">
       </div>
       <div class="card-back">
-        <img draggable="false">
+        <img draggable="false" src="" alt="">
       </div>
     </div>
   </div>
@@ -88,6 +88,7 @@
   <div class="game-area-header">
     <h2 class="game-timer">00:00:00</h2>
     <button id="abandon">Abandon</button>
+    <button class="restart-button">Recommencer</button>
   </div>
   <div class="graphe-board hidden" id="graphe">
     <svg id="liens"></svg>

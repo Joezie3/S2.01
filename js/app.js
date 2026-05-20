@@ -14,8 +14,9 @@ document.addEventListener("gameEnd",async (event)=>{
     domManager.showModal(result,event.detail.reason);
   }
 })
+
 document.querySelector("#close-modal-button").addEventListener("click",()=>{domManager.closeModal()})
-document.querySelector("#restart-button").addEventListener("click",()=>{location.reload()})
+document.querySelectorAll(".restart-button").forEach((btn)=>{btn.addEventListener("click",()=>{location.reload()})})
 document.querySelector("#abandon").addEventListener('click',()=>{
   document.dispatchEvent(game.Fin("abandon"));
 })
