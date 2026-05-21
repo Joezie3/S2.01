@@ -6,17 +6,39 @@ import {Chronometer,ObserverElement} from './Utils.js';
 
 const game = new Game();
 const domManager = new DOMManager(game);
-document.addEventListener("gameEnd",async (event)=>{
-  if (game.state!=="ended") {
-    console.log("Fin de la partie, raison :" + event.detail.reason);
-    domManager.disableInteraction();
-    let result = await game.endGame();
-    domManager.endGame(result,event.detail.reason);
-  }
-})
 
+/**
+ * Termine la partie. Execute toutes les actions de fin de partie, que ce soit pour l'interface ou pour la partie logique
+ * @param {{reason:string,showModal:boolean}}detail
+ */
+function endGame(detail){
+  if (game.state!=="ended") {
+    console.log("Fin de la partie, raison :" + detail.reason + "showModal:"+detail.showModal);
+    domManager.disableInteraction();
+    let result = game.endGame();
+    domManager.endGame(result,detail);
+  }
+}
+/**
+ * @listens Game.FinPartie
+ */
+document.addEventListener("gameEnd",(event)=>{
+  event.preventDefault();
+  endGame(event.detail);
+})
+function loadGame(){
+
+}
 document.querySelector("#close-modal-button").addEventListener("click",()=>{domManager.toggleModal()})
 document.querySelector("#show-result").addEventListener("click",()=>{domManager.toggleModal()});
+document.querySelectorAll(".restart-button").forEach((button)=>{
+  button.addEventListener("click",()=>{
+    endGame({reason:"abandon",showModal:false})
+    setTimeout(()=>{domManager.resetAll(false);document.querySelector("button[type=submit]").click()},0)
+
+  }
+  )
+})
 document.querySelector("#mainpage-modal-button").addEventListener("click",()=>{domManager.resetAll()})
 document.querySelector("#abandon").addEventListener('click',()=>{
   document.dispatchEvent(game.Fin("abandon"));
@@ -46,7 +68,7 @@ document.querySelector('.game-form').addEventListener('submit', async function (
 
     domManager.createBoard()
     domManager.enableInteraction()
-    domManager.toggleSetupMenu()
+    domManager.toggleSetupMenu(false)
 
   } catch (error) {
     console.error('Error:', error);

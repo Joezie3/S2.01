@@ -61,8 +61,9 @@ export class DOMManager {
   }
   /**
    * Réinitialise l'état du jeu. Supprime le plateau du memory ou memory graphe (selon le mode de jeu), ferme la fenetre modale de résultat, affiche de nouveau le formulaire de séléction du jeu.
+   * @param {boolean}[showSetup=true] Affiche ou non le formulaire de lancement. Par défaut vrai, uniquement faut pour recommencer rapidement une partie avec les mêmes paramètres
    */
-  resetAll(){
+  resetAll(showSetup=true){
     switch (this.game.settings.gamemode){
       case ("regular"):{
         this.removeChildren(document.querySelector(".game-board"));
@@ -78,24 +79,39 @@ export class DOMManager {
     }
     document.querySelector("#abandon").classList.remove("hidden");
     document.querySelector("#show-result").classList.add("hidden");
-    this.toggleSetupMenu()
+    if (showSetup){
+      console.log("AFFICHAGE DU MENU")
+      this.toggleSetupMenu()
+    }
     this.toggleGameArea();
     this.toggleModal(false);
   }
 
   /**
    * Affiche ou cache l'affichage du menu de sélection pour le jeu
+   * @param {boolean}[visible=undefined] Force l'affichage({@linkplain true}) ou le masquage({@linkplain false}) du menu. Par défaut non défini, ayant pour effet d'activer ou désactiver selon l'état actuel
    */
-  toggleSetupMenu(){
-    document.querySelector(".setup-form").classList.toggle("hidden");
+  toggleSetupMenu(visible = undefined){
+    const setupForm = document.querySelector(".setup-form");
+    if (visible === undefined){
+      setupForm.classList.toggle("hidden");
+    }
+    else{
+      if (visible){
+        setupForm.classList.remove("hidden");
+      }
+      else{
+        setupForm.classList.add("hidden")
+      }
+    }
   }
 
   /**
    * Effectue les modifications sur le DOM à la fin de la partie, c'est-à-dire afficher fenêtre de résultat, cacher le bouton abandonner, afficher le bouton pour afficher la fenetre de résultat
    * @param {Response}result Résultat de la partie renvoyé par le serveur distant. Contient entre autre le score du joueur.
-   * @param {string} reason Raison de la fin de partie. Soit "regular" (le joueur a tout découvert), "no-remaining-attempts" (le joueur a utilisé toutes ses tentatives autorisées dans le mode difficile, et "abandon" (le joueur a abandonné)
+   * @param {{reason:string,showModal:boolean}} detail Detail (condition) de la fin de la partie. Contient notamment la raison de la fin de partie (detail.reason). Soit "regular" (le joueur a tout découvert), "no-remaining-attempts" (le joueur a utilisé toutes ses tentatives autorisées dans le mode difficile, et "abandon" (le joueur a abandonné)
    */
-  endGame(result,reason){
+  endGame(result,detail){
     const modal = document.querySelector("#endgame-modal");
     modal.querySelector("#modal-time").innerText = this.game.chrono.time;
     modal.querySelector("#modal-score").innerText = result.score;
@@ -103,7 +119,7 @@ export class DOMManager {
     modal.querySelector("#modal-difficulty").innerText = this.game.settings.difficulty;
     modal.querySelector("#modal-mode").innerText = this.game.settings.gamemode === "regular"?"Memory":"Graphe";
     let message;
-    switch (reason){
+    switch (detail.reason){
       case ("regular"):{
         message = "Bravo ! Vous avez gagné";
         break;
@@ -120,7 +136,9 @@ export class DOMManager {
     modal.querySelector(".modal-message").innerText = message;
     document.querySelector("#abandon").classList.add("hidden");
     document.querySelector("#show-result").classList.remove("hidden");
-    this.toggleModal();
+    if (detail.showModal) {
+      this.toggleModal();
+    }
   }
 
   /**

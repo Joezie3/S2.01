@@ -5,12 +5,13 @@ import {Chronometer, Aleatoire} from "./Utils.js";
 
 /**
  * @event Game.FinPartie
- * @property {{reason:string}} detail
+ * @property {{reason:string,showModal:boolean}} detail
  */
 class FinPartie extends CustomEvent{
-  constructor(reason) {
+  constructor(reason,showModal) {
     super("gameEnd",{detail:{
-      reason:reason
+      reason:reason,
+        showModal:showModal
       }});
   }
 }
@@ -85,12 +86,13 @@ export class Game {
   }
 
   /**
-   * @param reason
+   * @param {string}reason
+   * @param {boolean}[showModal=true] Affiche une fenetre modale ou non à la fin.
    * @return {Game.FinPartie}
    * @constructor
    */
-  Fin(reason){
-    return new FinPartie(reason);
+  Fin(reason,showModal=true){
+    return new FinPartie(reason,showModal);
   }
   async endGame() {
     if (this.#state !== "ended") {
