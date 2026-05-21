@@ -16,7 +16,9 @@ export class DOMManager {
    * Active les interactions avec le jeu (plus précisement les éléments du plateau, des cartes ou des sommets)
    */
   enableInteraction(){
-    this.enabled = true;
+    if (this.game.state==="started") {
+      this.enabled = true;
+    }
   }
   /**
    * Désactive les interactions avec le jeu (plus précisement les éléments du plateau, des cartes ou des sommets)
@@ -296,7 +298,7 @@ export class DOMManager {
     let img = card.querySelector(".card-back img");
     img.setAttribute("src",image.url);
     img.setAttribute("alt",image.name);
-    card.querySelector(".card-inner").addEventListener("click",(event)=>{if (this.enabled){this.clickCard(event)}});
+    card.querySelector(".card-inner").addEventListener("click",(event)=>{console.log(this.enabled);if (this.enabled){this.clickCard(event)}});
     return card;
   }
   /**

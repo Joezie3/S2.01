@@ -8,7 +8,7 @@ import {Chronometer, Aleatoire} from "./Utils.js";
  * @property {{reason:string,showModal:boolean}} detail
  */
 class FinPartie extends CustomEvent{
-  constructor(reason,showModal) {
+  constructor(reason,showModal=true) {
     super("gameEnd",{detail:{
       reason:reason,
         showModal:showModal

@@ -15,6 +15,7 @@ async function endGame(detail){
   if (game.state!=="ended") {
     console.log("Fin de la partie, raison :" + detail.reason + "showModal:"+detail.showModal);
     domManager.disableInteraction();
+    console.log("PLUS D'INTERACTIONS")
     let result = await game.endGame();
     domManager.endGame(result,detail);
   }
