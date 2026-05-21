@@ -1,5 +1,6 @@
 import {Game} from "./Game.js";
 import {shuffle,Subject} from "./Utils.js";
+import {genererPositions} from "./Graphe.js";
 
 export class DOMManager {
   enabled = false;
@@ -48,12 +49,13 @@ export class DOMManager {
   }
 
   /**
-   * Supprime tous les enfants de l'élément du DOM, de manière non recursive.
+   * Supprime tous les enfants de l'élément du DOM
    * @param {HTMLElement} element Element dont on souhaite supprimer les éléments enfants.
+   * @param {number}[start=0] L'indice de l'élément à partir duquel on commence à supprimer
    */
-  removeChildren(element){
+  removeChildren(element,start=0){
     const children = [...element.children]
-    for (let child of children){
+    for (let child of children.slice(start)){
       child.remove();
     }
   }
@@ -68,7 +70,8 @@ export class DOMManager {
         break;
       }
       case("graphe"):{
-        this.removeChildren(document.querySelector(".graphe-board"));
+        this.removeChildren(document.querySelector("svg#liens"));
+        this.removeChildren(document.querySelector(".graphe-board"),1);
         document.querySelector(".graphe-board").classList.toggle("hidden")
         break;
       }
@@ -291,44 +294,12 @@ export class DOMManager {
       cardElements.push(this.createCard(image,cardIndex++));
     }
     shuffle(cardElements);
-    for (let image of cardElements){
-      gameBoard.append(image);
-    }
+    cardElements.forEach((image)=>{gameBoard.append(image)})
   }
 
   /**
-   * Genère les positions (x,y) pour afficher le Graphe. Utilise l'algorithme de positionnement radial, qui place tous les sommets sur un cercle, avec des perturbations (du "bruits")
-   * @param {node[]}sommets La liste des sommets à positionner
-   * @param {number}largeur La largeur disponible pour dessiner le graphe
-   * @param {number}hauteur La hauteur disponible pour dessiner le graphe
-   * @returns {Map<node,Coordinate>}
+   * Crée le plateau pour le jeu, en fonction du mode de jeu selectionné
    */
-  genererPositions(sommets, largeur, hauteur) {
-    /**
-     * @type {Map<node,Coordinate>}
-     */
-    const positions = new Map();
-    const test = {"a":{x:1,y:2}}
-    const centreX = largeur / 2;
-    const centreY = hauteur / 2;
-
-    const marge = 60;
-
-    const rayon = Math.min(largeur, hauteur) / 2 - marge;
-
-    const angleStep = (2 * Math.PI) / sommets.length;
-
-    sommets.forEach((sommet, i) => {
-      const angle = i * angleStep;
-      const bruit = 30;
-      positions.set(sommet, {
-        x: centreX + Math.cos(angle) * rayon + (Math.random() * bruit - bruit / 2),
-        y: centreY + Math.sin(angle) * rayon + (Math.random() * bruit - bruit / 2)
-      });
-    });
-    return positions;
-  }
-
   createBoard(){
     switch (this.game.settings.gamemode){
       case ("regular"):{
@@ -343,21 +314,21 @@ export class DOMManager {
     }
   }
   /**
-   * Ajoute toutes les images d'une collection sur le gameBoard
-   * @param {Map<String,String[]>} graphe
+   * Crée et ajoute au DOM les sommets du graphe ainsi que les arêtes.
+   * @param {Map<String,String[]>} graphe Le graphe à représenter
    */
   createGraphe(graphe){
     let grapheElement = document.querySelector("#graphe");
-    const positions = this.genererPositions(Array.from(graphe.keys()),document.querySelector(".game-area-header").clientWidth,400);
-    const svg = document.querySelector("svg#liens");
+    const svg = document.querySelector("svg#liens")
+    const positions = genererPositions(Array.from(graphe.keys()),document.querySelector(".game-area-header").clientWidth,400);
     let aretes = [];
     for (const sommet of graphe.keys()) {
       let sommetEl = document.createElement("div");
       sommetEl.classList.toggle("sommet");
       sommetEl.innerText = sommet;
       sommetEl.dataset["node"] = sommet;
-      sommetEl.style.left = positions[sommet].x + "px";
-      sommetEl.style.top = positions[sommet].y + "px";
+      sommetEl.style.left = positions.get(sommet).x + "px";
+      sommetEl.style.top = positions.get(sommet).y + "px";
       sommetEl.addEventListener("click",(event)=>{if(this.enabled){this.clickNode(event)}})
       grapheElement.append(sommetEl)
       for (let voisin of graphe.get(sommet)) {
@@ -370,11 +341,11 @@ export class DOMManager {
           );
           ligne.dataset["nodes"] = edge_string;
           ligne.classList.add("hidden")
-          ligne.setAttribute("x1", positions[sommet].x + 25);
-          ligne.setAttribute("y1", positions[sommet].y + 25);
+          ligne.setAttribute("x1", positions.get(sommet).x + 25);
+          ligne.setAttribute("y1", positions.get(sommet).y + 25);
 
-          ligne.setAttribute("x2", positions[voisin].x + 25);
-          ligne.setAttribute("y2", positions[voisin].y + 25);
+          ligne.setAttribute("x2", positions.get(voisin).x + 25);
+          ligne.setAttribute("y2", positions.get(voisin).y + 25);
 
           ligne.setAttribute("stroke", "lightgrey");
           ligne.setAttribute("stroke-width", "3");

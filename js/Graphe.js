@@ -78,3 +78,35 @@ export function genererGraphe(nbSommets, nbAretes) {
 
     return graphe;
 }
+/**
+ * Genère les positions (x,y) pour afficher le Graphe. Utilise l'algorithme de positionnement radial, qui place tous les sommets sur un cercle, avec des perturbations (du "bruits")
+ * @param {node[]}sommets La liste des sommets à positionner
+ * @param {number}largeur La largeur disponible pour dessiner le graphe
+ * @param {number}hauteur La hauteur disponible pour dessiner le graphe
+ * @returns {Map<node,Coordinate>}
+ */
+export function genererPositions(sommets, largeur, hauteur) {
+    /**
+     * @type {Map<node,Coordinate>}
+     */
+    const positions = new Map();
+    const test = {"a":{x:1,y:2}}
+    const centreX = largeur / 2;
+    const centreY = hauteur / 2;
+
+    const marge = 60;
+
+    const rayon = Math.min(largeur, hauteur) / 2 - marge;
+
+    const angleStep = (2 * Math.PI) / sommets.length;
+
+    sommets.forEach((sommet, i) => {
+        const angle = i * angleStep;
+        const bruit = 30;
+        positions.set(sommet, {
+            x: centreX + Math.cos(angle) * rayon + (Math.random() * bruit - bruit / 2),
+            y: centreY + Math.sin(angle) * rayon + (Math.random() * bruit - bruit / 2)
+        });
+    });
+    return positions;
+}

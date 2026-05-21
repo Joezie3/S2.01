@@ -1,7 +1,7 @@
 import {imageCollections} from './ImageCollection.js';
 import {ApiService} from './ApiService.js';
 import {genererGraphe} from "./Graphe.js";
-import {Chronometer, Aleatoire, entierAleatoire} from "./Utils.js";
+import {Chronometer, Aleatoire} from "./Utils.js";
 
 /**
  * @event Game.FinPartie
