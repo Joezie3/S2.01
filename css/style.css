@@ -409,6 +409,10 @@ svg{
   border-radius: 0.75rem;
   padding: 1rem;
   text-align: center;
+  &[data-hardcore="true"]{
+    background-color: red;
+  }
+
 }
 .modal-stat .label {
   display: block;

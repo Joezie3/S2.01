@@ -116,10 +116,13 @@ export class DOMManager {
   endGame(result,detail){
     const modal = document.querySelector("#endgame-modal");
     modal.querySelector("#modal-time").innerText = this.game.chrono.time;
-    modal.querySelector("#modal-score").innerText = result.score;
+    modal.querySelector("#modal-score").innerText = Math.round(result.score*100)/100;
     modal.querySelector("#modal-attemps").innerText = this.game.attemps;
     modal.querySelector("#modal-difficulty").innerText = this.game.settings.difficulty;
     modal.querySelector("#modal-mode").innerText = this.game.settings.gamemode === "regular"?"Memory":"Graphe";
+    modal.querySelector("#modal-hardcore").innerText = this.game.settings.hardcore;
+    modal.querySelector("#modal-hardcore").closest(".modal-stat").dataset["hardcore"]="true"
+
     let message;
     switch (detail.reason){
       case ("regular"):{
