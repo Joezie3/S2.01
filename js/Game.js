@@ -50,7 +50,7 @@ export class Game {
    */
   #state
   /**
-   * @type {string}
+   * @type {number}
    */
   #remainingAttempts
   /**
@@ -118,7 +118,8 @@ export class Game {
     this.#settings = settings;
     this.#remainingAttempts=this.#settings.difficulty-1;
     this.#attemps = 0;
-    this.pairesrestantes = this.#settings.difficulty;
+    this.#pairesrestantes = this.#settings.difficulty;
+    this.#selectedElement = null;
     if (this.#settings.gamemode==="graphe"){
       this.graphe = genererGraphe(Aleatoire.entierAleatoireEntre(4,this.#settings.difficulty),this.#settings.difficulty)
       this.#grapheDiscovered = new Map()

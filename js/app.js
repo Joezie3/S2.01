@@ -9,7 +9,7 @@ const domManager = new DOMManager(game);
 document.addEventListener("gameEnd",async (event)=>{
   if (game.state!=="ended") {
     console.log("Fin de la partie, raison :" + event.detail.reason);
-    domManager.disable();
+    domManager.disableInteraction();
     let result = await game.endGame();
     domManager.endGame(result,event.detail.reason);
   }
@@ -45,10 +45,8 @@ document.querySelector('.game-form').addEventListener('submit', async function (
     game.chrono.reset()
 
     domManager.createBoard()
-    domManager.enable()
+    domManager.enableInteraction()
     domManager.toggleSetupMenu()
-
-
 
   } catch (error) {
     console.error('Error:', error);

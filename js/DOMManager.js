@@ -11,18 +11,16 @@ export class DOMManager {
   constructor(game) {
     this.game = game;
   }
-
   /**
-   * Active les interactions avec le jeu
+   * Active les interactions avec le jeu (plus précisement les éléments du plateau, des cartes ou des sommets)
    */
-  enable(){
+  enableInteraction(){
     this.enabled = true;
   }
-
   /**
-   * Désactive les interactions avec le jeu
+   * Désactive les interactions avec le jeu (plus précisement les éléments du plateau, des cartes ou des sommets)
    */
-  disable(){
+  disableInteraction(){
     this.enabled = false;
   }
   getCard(index){
@@ -37,7 +35,6 @@ export class DOMManager {
       card.classList.toggle("flip")
     }
   }
-
   /**
    * Fais pulser une carte du memory, vert si la paire est correcte, rouge dans l'autre cas.
    * @param {HTMLElement} card Element div de type card
@@ -49,21 +46,21 @@ export class DOMManager {
     card.classList.toggle(color);
     setTimeout(()=>{card.classList.toggle(color);card.classList.toggle("pulsing")},1000)
   }
+  removeChildren(element){
+    const children = [...element.children]
+    for (let child of children){
+      child.remove();
+    }
+  }
   resetAll(){
     switch (this.game.settings.gamemode){
       case ("regular"):{
-        const children = [...document.querySelector(".game-board").children];
-        for (let child of children){
-          child.remove();
-        }
+        this.removeChildren(document.querySelector(".game-board"));
         document.querySelector(".game-board").classList.toggle("hidden");
         break;
       }
       case("graphe"):{
-        const children = [...document.querySelector(".graphe-board").children];
-        for (let child of children){
-          child.remove();
-        }
+        this.removeChildren(document.querySelector(".graphe-board"));
         document.querySelector(".graphe-board").classList.toggle("hidden")
         break;
       }
@@ -74,26 +71,39 @@ export class DOMManager {
     this.toggleGameArea();
     this.toggleModal(false);
   }
+
+  /**
+   * Affiche ou cache l'affichage du menu de sélection pour le jeu
+   */
   toggleSetupMenu(){
     document.querySelector(".setup-form").classList.toggle("hidden");
   }
+
+  /**
+   * Effectue les modifications sur le DOM à la fin de la partie, c'est à dire afficher fenetre de résultat, cacher le bouton abandonner, afficher le bouton pour afficher la fenetre de résultat
+   * @param {Response}result Résultat de la partie renvoyé par le serveur distant. Contient entre autre le score du joueur.
+   * @param {string} reason Raison de la fin de partie. Soit "regular" (le joueur a tout découvert), "no-remaining-attempts" (le joueur a utilisé toutes ses tentatives autorisées dans le mode difficile, et "abandon" (le joueur a abandonné)
+   */
   endGame(result,reason){
     const modal = document.querySelector("#endgame-modal");
     modal.querySelector("#modal-time").innerText = this.game.chrono.time;
     modal.querySelector("#modal-score").innerText = result.score;
     modal.querySelector("#modal-attemps").innerText = this.game.attemps;
-    modal.querySelector("#modal-difficulty").innerText = this.game.settings.difficulty
-    modal.querySelector("#modal-mode").innerText = this.game.settings.gamemode === "regular"?"Memory":"Graphe"
+    modal.querySelector("#modal-difficulty").innerText = this.game.settings.difficulty;
+    modal.querySelector("#modal-mode").innerText = this.game.settings.gamemode === "regular"?"Memory":"Graphe";
     let message;
     switch (reason){
       case ("regular"):{
-        message = "Bravo ! Vous avez gagné";break
+        message = "Bravo ! Vous avez gagné";
+        break;
       }
       case ("no-remaining-attempts"):{
-        message = "Dommage ! Vous avez épuisé toutes vos tentatives";break;
+        message = "Dommage ! Vous avez épuisé toutes vos tentatives";
+        break;
       }
       case ("abandon"):{
-        message = "Vous avez abandonné !";break;
+        message = "Vous avez abandonné !";
+        break;
       }
     }
     modal.querySelector(".modal-message").innerText = message;
@@ -101,6 +111,10 @@ export class DOMManager {
     document.querySelector("#show-result").classList.remove("hidden");
     this.toggleModal();
   }
+
+  /**
+   * Affiche ou cache le plateau de jeu.
+   */
   toggleGameArea(){
     document.querySelector(".game-area").classList.toggle("hidden");
   }
@@ -136,12 +150,12 @@ export class DOMManager {
       this.flipCards(secondCard);
       switch (result.type){
         case ("wrong-pair"):{
-          this.disable();
+          this.disableInteraction();
           this.pulse(firstCard);
           this.pulse(secondCard);
           setTimeout(()=>{
             this.flipCards(firstCard,secondCard);
-            this.enable()
+            this.enableInteraction()
           },1000);
           break;
         }
@@ -239,7 +253,7 @@ export class DOMManager {
       }
     }
     if (allDiscovered){
-      this.disable();
+      this.disableInteraction();
     }
   }
   createCard(image,cardIndex){

@@ -50,7 +50,6 @@ export class ApiService {
     if (!response.ok) {
       throw new Error('Erreur lors de la mise à jour du score');
     }
-
     return response.json();
   }
 }
