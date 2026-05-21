@@ -35,7 +35,6 @@ document.querySelectorAll(".restart-button").forEach((button)=>{
   button.addEventListener("click",()=>{
     endGame({reason:"abandon",showModal:false})
     setTimeout(()=>{domManager.resetAll(false);document.querySelector("button[type=submit]").click()},0)
-
   }
   )
 })
