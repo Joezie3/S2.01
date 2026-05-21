@@ -1,12 +1,10 @@
 import {DOMManager} from './DOMManager.js';
 import {Game} from './Game.js';
 import {ApiService} from './ApiService.js';
-import {Chronometer,ObserverElement} from './Utils.js';
-
+import {ObserverElement} from './Utils.js';
 
 const game = new Game();
 const domManager = new DOMManager(game);
-
 /**
  * Termine la partie. Execute toutes les actions de fin de partie, que ce soit pour l'interface ou pour la partie logique
  * @param {{reason:string,showModal:boolean}}detail
@@ -25,7 +23,7 @@ async function endGame(detail){
  */
 document.addEventListener("gameEnd",(event)=>{
   event.preventDefault();
-  let a= endGame(event.detail)
+  endGame(event.detail);
 })
 document.querySelector("#close-modal-button").addEventListener("click",()=>{domManager.toggleModal()})
 document.querySelector("#show-result").addEventListener("click",()=>{domManager.toggleModal()});
@@ -43,12 +41,7 @@ document.querySelector("#abandon").addEventListener('click',()=>{
 })
 document.querySelector('.game-form').addEventListener('submit', async function (event) {
   event.preventDefault();
-  // console.log(event.target)
   let formData = new FormData(document.querySelector(".game-form"));
-  // console.log(formData)
-  // for (const [key,value] of formData){
-  //   console.log(key,value)
-  // }
   const settings = Object.fromEntries(formData);
   settings["hardcore"] = settings["hardcore"]==="on";
   console.log(settings)
@@ -60,8 +53,7 @@ document.querySelector('.game-form').addEventListener('submit', async function (
       document.addEventListener("wrong-pair",(event)=>{game.failedAttempt()})
     }
     domManager.toggleGameArea()
-    const gameTimer = document.querySelector(".game-timer");
-    game.chrono.subscribe(new ObserverElement(gameTimer));
+    game.chrono.subscribe(new ObserverElement(document.querySelector(".game-timer")));
     game.chrono.reset()
 
     domManager.createBoard()
