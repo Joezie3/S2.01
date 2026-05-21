@@ -32,14 +32,9 @@ document.querySelector('.game-form').addEventListener('submit', async function (
   const settings = Object.fromEntries(formData);
   settings["hardcore"] = settings["hardcore"]==="on";
   console.log(settings)
-
-  // Todo À compléter
-
   try {
-    // Todo Spécifier les paramètres de createGame()
     const data = await ApiService.createGame(settings.playername,Number(settings.difficulty));
     console.log('Success:', data, data.id);
-    // game.startGame(data.id,gamemode,Number(difficulty),hardcore);
     game.startGame(data.id,settings);
     if (settings.hardcore){
       document.addEventListener("wrong-pair",(event)=>{game.failedAttempt()})

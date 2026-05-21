@@ -11,9 +11,17 @@ export class DOMManager {
   constructor(game) {
     this.game = game;
   }
+
+  /**
+   * Active les interactions avec le jeu
+   */
   enable(){
     this.enabled = true;
   }
+
+  /**
+   * Désactive les interactions avec le jeu
+   */
   disable(){
     this.enabled = false;
   }
@@ -29,6 +37,12 @@ export class DOMManager {
       card.classList.toggle("flip")
     }
   }
+
+  /**
+   * Fais pulser une carte du memory, vert si la paire est correcte, rouge dans l'autre cas.
+   * @param {HTMLElement} card Element div de type card
+   * @param {boolean} correct
+   */
   pulse(card,correct){
     card.classList.toggle("pulsing");
     let color = correct?"right":"wrong";
@@ -110,6 +124,10 @@ export class DOMManager {
 
     }
   }
+  /**
+   * Effectue les changements nécessaires pour l'affichage du memory en fonction des indications dans le résultat fourni par le moteur logique du jeu (Game.js)
+   * @param {interactionResult} result
+   */
   handleCardResult(result){
     if (result.type==="first-selection")this.flipCards(this.getCard(result.element.index))
     else{
@@ -136,6 +154,11 @@ export class DOMManager {
       }
     }
   }
+
+  /**
+   * Gère l'interaction avec une carte en appelant le moteur logique du jeu et en interprétant les résultats
+   * @param {Event} event
+   */
   clickCard(event){
     const card = event.target.closest("div.card");
     if (card.classList.contains("found")){
@@ -147,15 +170,23 @@ export class DOMManager {
 
   }
   /**
-   * Met en surbrillance un noeud
+   * Met en surbrillance un nœud
    * @param {string} node Le nom du sommet
    */
   highlightNode(node){
     document.querySelector(`.sommet[data-node=${node}]`).classList.toggle("selected");
   }
+  /**
+   * Marque le sommet comme entièrement découvert, empêchant les interactions avec ce dernier.
+   * @param {string}node Le nom du sommet
+   */
   discoverNode(node){
     document.querySelector(`.sommet[data-node=${node}]`).classList.add("found")
   }
+  /**
+   * Gère l'interaction avec un sommet en appelant le moteur logique du jeu et en interprétant les résultats
+   * @param {Event} event
+   */
   clickNode(event){
     const node = event.target.dataset.node;
     if (event.target.classList.contains("found")){
@@ -178,6 +209,11 @@ export class DOMManager {
       }
     }
   }
+
+  /**
+   * Effectue les changements nécessaires pour l'affichage du graphe en fonction des indications dans le résultat fourni par le moteur logique du jeu (Game.js)
+   * @param {interactionResult} result
+   */
   handleGraphResult(result){
     switch(result.type){
       case("first-selection"):{
@@ -192,7 +228,7 @@ export class DOMManager {
       case("wrong-pair"):{
         this.highlightNode(result.first);break
       }
-      case("already-found"):{
+      case("already-found"):{ // Si le nœud sur lequel on clique
         this.highlightNode(result.first);break
       }
     }
@@ -222,7 +258,6 @@ export class DOMManager {
    * @param {Image[]} images
    */
   createCards(images) {
-
     const gameBoard = document.querySelector('.game-board');
     const cardElements = [];
     let cardIndex = 0;
@@ -272,6 +307,10 @@ export class DOMManager {
       }
     }
   }
+  /**
+   * Ajoute toutes les images d'une collection sur le gameBoard
+   * @param {Map<String,String[]>} graphe
+   */
   createGraphe(graphe){
     let grapheElement = document.querySelector("#graphe");
     const positions = this.genererPositions(Array.from(graphe.keys()),document.querySelector(".game-area-header").clientWidth,400);
