@@ -51,3 +51,9 @@
  * Un graphe, représenté par une liste d'adjacence. On utilise un dictionnaire. La clé est le nom du {@link node sommet}, et la valeur est un {@link neighbors tableau} contenant les noms des sommets voisins
  * @typedef {Map<string, node[]>} Graphe
  */
+/**
+ * Représentation des coordonnées d'un point sur un repère en 2 dimensions.
+ * @typedef {Object} Coordinate
+ * @property {number} x Coordonnée x
+ * @property {number} y Coordonnée y
+ */

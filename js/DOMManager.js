@@ -38,20 +38,28 @@ export class DOMManager {
   /**
    * Fais pulser une carte du memory, vert si la paire est correcte, rouge dans l'autre cas.
    * @param {HTMLElement} card Element div de type card
-   * @param {boolean} correct
+   * @param {boolean} [correct=false] Validité de la paire. Assumé erronée par défaut.
    */
-  pulse(card,correct){
+  pulse(card,correct=false){
     card.classList.toggle("pulsing");
     let color = correct?"right":"wrong";
     card.classList.toggle(color);
     setTimeout(()=>{card.classList.toggle(color);card.classList.toggle("pulsing")},1000)
   }
+
+  /**
+   * Supprime tous les enfants de l'élément du DOM, de manière non recursive.
+   * @param {HTMLElement} element Element dont on souhaite supprimer les éléments enfants.
+   */
   removeChildren(element){
     const children = [...element.children]
     for (let child of children){
       child.remove();
     }
   }
+  /**
+   * Réinitialise l'état du jeu. Supprime le plateau du memory ou memory graphe (selon le mode de jeu), ferme la fenetre modale de résultat, affiche de nouveau le formulaire de séléction du jeu.
+   */
   resetAll(){
     switch (this.game.settings.gamemode){
       case ("regular"):{
@@ -80,7 +88,7 @@ export class DOMManager {
   }
 
   /**
-   * Effectue les modifications sur le DOM à la fin de la partie, c'est à dire afficher fenetre de résultat, cacher le bouton abandonner, afficher le bouton pour afficher la fenetre de résultat
+   * Effectue les modifications sur le DOM à la fin de la partie, c'est-à-dire afficher fenêtre de résultat, cacher le bouton abandonner, afficher le bouton pour afficher la fenetre de résultat
    * @param {Response}result Résultat de la partie renvoyé par le serveur distant. Contient entre autre le score du joueur.
    * @param {string} reason Raison de la fin de partie. Soit "regular" (le joueur a tout découvert), "no-remaining-attempts" (le joueur a utilisé toutes ses tentatives autorisées dans le mode difficile, et "abandon" (le joueur a abandonné)
    */
@@ -120,7 +128,7 @@ export class DOMManager {
   }
   /**
    *
-   * @param {boolean} state Visibilité de la fenetre
+   * @param {boolean} state Visibilité de la fenêtre
    */
   toggleModal(state = undefined){
     const modal = document.querySelector("#endgame-modal");
@@ -134,13 +142,11 @@ export class DOMManager {
       else{
         modal.classList.add("hidden");
       }
-     // console.log(modal.classList.contains("hidden"))
-
     }
   }
   /**
    * Effectue les changements nécessaires pour l'affichage du memory en fonction des indications dans le résultat fourni par le moteur logique du jeu (Game.js)
-   * @param {interactionResult} result
+   * @param {interactionResult} result Résultat d'interactions du joueur renvoyer par le moteur logique du jeu. Les différents cas sont principalement désigné par la nature du résultat (paire correcte, etc...)
    */
   handleCardResult(result){
     if (result.type==="first-selection")this.flipCards(this.getCard(result.element.index))
@@ -168,7 +174,6 @@ export class DOMManager {
       }
     }
   }
-
   /**
    * Gère l'interaction avec une carte en appelant le moteur logique du jeu et en interprétant les résultats
    * @param {Event} event
@@ -223,7 +228,6 @@ export class DOMManager {
       }
     }
   }
-
   /**
    * Effectue les changements nécessaires pour l'affichage du graphe en fonction des indications dans le résultat fourni par le moteur logique du jeu (Game.js)
    * @param {interactionResult} result
@@ -256,6 +260,13 @@ export class DOMManager {
       this.disableInteraction();
     }
   }
+
+  /**
+   * Crée un élément div de classe card, à partir d'un template.
+   * @param {Image}image Un objet de type Image, contenant l'identifiant de l'image, son url et son nom.
+   * @param {number}cardIndex L'index du div, permettant de différencier deux cartes ayant la même image.
+   * @returns {HTMLDivElement}
+   */
   createCard(image,cardIndex){
     const cardTemplate = document.querySelector("#cardTemplate");
     let card = cardTemplate.content.cloneNode(true).querySelector(".card");
@@ -268,8 +279,8 @@ export class DOMManager {
     return card;
   }
   /**
-   * Ajoute toutes les images d'une collection sur le gameBoard
-   * @param {Image[]} images
+   * Ajoute toutes les images d'une collection sur le gameBoard. Crée chacune des images et mélange le set, puis les ajoute au DOM.
+   * @param {Image[]} images Le set d'image à ajouter.
    */
   createCards(images) {
     const gameBoard = document.querySelector('.game-board');
@@ -284,10 +295,20 @@ export class DOMManager {
       gameBoard.append(image);
     }
   }
-  genererPositions(sommets, largeur, hauteur) {
-    // console.log(largeur,hauteur)
-    const positions = {};
 
+  /**
+   * Genère les positions (x,y) pour afficher le Graphe. Utilise l'algorithme de positionnement radial, qui place tous les sommets sur un cercle, avec des perturbations (du "bruits")
+   * @param {node[]}sommets La liste des sommets à positionner
+   * @param {number}largeur La largeur disponible pour dessiner le graphe
+   * @param {number}hauteur La hauteur disponible pour dessiner le graphe
+   * @returns {Map<node,Coordinate>}
+   */
+  genererPositions(sommets, largeur, hauteur) {
+    /**
+     * @type {Map<node,Coordinate>}
+     */
+    const positions = new Map();
+    const test = {"a":{x:1,y:2}}
     const centreX = largeur / 2;
     const centreY = hauteur / 2;
 
@@ -300,10 +321,10 @@ export class DOMManager {
     sommets.forEach((sommet, i) => {
       const angle = i * angleStep;
       const bruit = 30;
-      positions[sommet] = {
+      positions.set(sommet, {
         x: centreX + Math.cos(angle) * rayon + (Math.random() * bruit - bruit / 2),
         y: centreY + Math.sin(angle) * rayon + (Math.random() * bruit - bruit / 2)
-      };
+      });
     });
     return positions;
   }
