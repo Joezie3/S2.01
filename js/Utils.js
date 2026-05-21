@@ -108,6 +108,13 @@ export function pad(n,nzero){
     }
     return "0"*(nzero - `${n}`.length) + `${n}`;
 }
+
+/**
+ * Un chronomètre. Permet de mesurer un temps depuis le lancement de ce dernier. Il est possible de l'arrêter, le reprendre, le réinitialiser.
+ * @augments Subject
+ * @property {number}startTime Un nombre de millisecondes depuis l'Epoch, décrivant la date de début du chronomètre
+ * @property {number}stopTime Un nombre de millisecondes depuis l'Epoch, décrivant la date d'arrêt du chronomètre
+ */
 export class Chronometer extends Subject{
     startTime;
     stopTime;

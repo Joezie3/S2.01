@@ -108,7 +108,7 @@ export class DOMManager {
 
   /**
    * Effectue les modifications sur le DOM à la fin de la partie, c'est-à-dire afficher fenêtre de résultat, cacher le bouton abandonner, afficher le bouton pour afficher la fenetre de résultat
-   * @param {Response}result Résultat de la partie renvoyé par le serveur distant. Contient entre autre le score du joueur.
+   * @param {any}result Résultat de la partie renvoyé par le serveur distant. Contient entre autre le score du joueur.
    * @param {{reason:string,showModal:boolean}} detail Detail (condition) de la fin de la partie. Contient notamment la raison de la fin de partie (detail.reason). Soit "regular" (le joueur a tout découvert), "no-remaining-attempts" (le joueur a utilisé toutes ses tentatives autorisées dans le mode difficile, et "abandon" (le joueur a abandonné)
    */
   endGame(result,detail){

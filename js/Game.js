@@ -94,6 +94,10 @@ export class Game {
   Fin(reason,showModal=true){
     return new FinPartie(reason,showModal);
   }
+
+  /**
+   * @returns {Promise<any>}
+   */
   async endGame() {
     if (this.#state !== "ended") {
       this.chrono.stop();
